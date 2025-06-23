@@ -7,12 +7,13 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "DR Ai - Dream Architect Intelligence",
+  title: "DR Ai - Dream Architect Intelligence | Code your dreams. Architect your future.",
   description:
-    "Advanced AI chatbot powered by Google Gemini LLM. Experience intelligent conversations with glassmorphism design, local data storage, and customizable themes.",
-  keywords: "AI chatbot, Gemini LLM, artificial intelligence, chat assistant, DR Ai, Dream Architect Intelligence",
+    "DR Ai is a futuristic, mobile-first, full-stack chatbot web application powered by Gemini LLM, designed for developers, creators, and digital visionaries. Transform natural language prompts into intelligent conversations, code, and creative outputs.",
+  keywords:
+    "AI chatbot, Gemini LLM, artificial intelligence, chat assistant, DR Ai, Dream Architect Intelligence, code generation, developer tools, creative AI, digital architect",
   authors: [{ name: "DR Ai Team" }],
-  creator: "DR Ai",
+  creator: "DR Ai - Dream Architect Intelligence",
   publisher: "DR Ai",
   formatDetection: {
     email: false,
@@ -25,15 +26,16 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "DR Ai - Dream Architect Intelligence",
-    description: "Advanced AI chatbot powered by Google Gemini LLM with glassmorphism design and local data storage.",
+    description:
+      "Code your dreams. Architect your future. Futuristic AI chatbot powered by Gemini LLM for developers, creators, and digital visionaries.",
     url: "https://dr-ai.vercel.app",
-    siteName: "DR Ai",
+    siteName: "DR Ai - Dream Architect Intelligence",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "DR Ai - Dream Architect Intelligence",
+        alt: "DR Ai - Dream Architect Intelligence - Code your dreams. Architect your future.",
       },
     ],
     locale: "en_US",
@@ -42,7 +44,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "DR Ai - Dream Architect Intelligence",
-    description: "Advanced AI chatbot powered by Google Gemini LLM",
+    description: "Code your dreams. Architect your future. Futuristic AI chatbot powered by Gemini LLM.",
     images: ["/og-image.png"],
     creator: "@drai_ai",
   },
@@ -82,7 +84,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               name: "DR Ai - Dream Architect Intelligence",
-              description: "Advanced AI chatbot powered by Google Gemini LLM",
+              description:
+                "Futuristic AI chatbot powered by Gemini LLM for developers, creators, and digital visionaries. Code your dreams. Architect your future.",
               url: "https://dr-ai.vercel.app",
               applicationCategory: "ProductivityApplication",
               operatingSystem: "Web Browser",
@@ -94,7 +97,9 @@ export default function RootLayout({
               creator: {
                 "@type": "Organization",
                 name: "DR Ai Team",
+                description: "Legendary digital architects and full-stack masters",
               },
+              keywords: "AI chatbot, Gemini LLM, code generation, developer tools, creative AI, digital architect",
             }),
           }}
         />

@@ -1,16 +1,17 @@
-import { Bot, Sparkles, Zap, Shield } from "lucide-react"
+import { Bot, Sparkles, Zap, Shield, Code, MessageCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { WhatsAppContact } from "@/components/whatsapp-contact"
 
 export const metadata = {
-  title: "About DR Ai - Dream Architect Intelligence",
+  title: "About DR Ai - Dream Architect Intelligence | Code your dreams. Architect your future.",
   description:
-    "Learn about DR Ai, your advanced AI assistant powered by Gemini LLM. Discover features, capabilities, and the technology behind our intelligent chatbot.",
+    "Learn about DR Ai, a futuristic AI chatbot powered by Gemini LLM, designed for developers, creators, and digital visionaries. Transform natural language into intelligent conversations, code, and creative outputs.",
   openGraph: {
     title: "About DR Ai - Dream Architect Intelligence",
     description:
-      "Advanced AI assistant powered by Gemini LLM with glassmorphism design and intelligent conversation capabilities.",
+      "Futuristic AI chatbot powered by Gemini LLM for developers, creators, and digital visionaries. Code your dreams. Architect your future.",
     type: "website",
   },
 }
@@ -19,7 +20,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/10 border-b border-white/20">
+      <header className="sticky top-0 z-40 backdrop-blur-md bg-white/10 border-b border-white/20">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
             <Bot className="w-8 h-8 text-purple-400" />
@@ -38,12 +39,21 @@ export default function AboutPage() {
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-            About DR Ai
+          <div className="flex items-center justify-center mb-4">
+            <Bot className="w-16 h-16 text-purple-400 mr-4" />
+            <Sparkles className="w-8 h-8 text-yellow-400 animate-pulse" />
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+            DR Ai
           </h1>
-          <p className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
-            Dream Architect Intelligence - Your advanced AI companion powered by Google's Gemini LLM, designed to help
-            you build, create, and innovate.
+          <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-white/90">Dream Architect Intelligence</h2>
+          <p className="text-xl md:text-2xl font-medium mb-6 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
+            "Code your dreams. Architect your future."
+          </p>
+          <p className="text-lg text-white/80 max-w-3xl mx-auto leading-relaxed">
+            DR Ai is a futuristic, mobile-first, full-stack chatbot web application powered by Gemini LLM, designed for
+            developers, creators, and digital visionaries. Transform natural language prompts into intelligent
+            conversations, code, and creative outputs – all within a sleek, glassmorphism UI.
           </p>
         </div>
 
@@ -59,7 +69,7 @@ export default function AboutPage() {
             <CardContent className="text-white/80">
               <p>
                 Powered by Google's advanced Gemini LLM, DR Ai provides intelligent, context-aware responses to help you
-                with coding, creative writing, problem-solving, and more.
+                with coding, creative writing, problem-solving, and architectural planning.
               </p>
             </CardContent>
           </Card>
@@ -113,13 +123,40 @@ export default function AboutPage() {
         {/* Mission Statement */}
         <Card className="backdrop-blur-md bg-white/10 border-white/20 mb-8">
           <CardHeader>
-            <CardTitle className="text-2xl text-white text-center">Our Mission</CardTitle>
+            <CardTitle className="text-2xl text-white text-center flex items-center justify-center">
+              <Code className="w-6 h-6 mr-2 text-purple-400" />
+              Our Mission
+            </CardTitle>
           </CardHeader>
           <CardContent className="text-white/80 text-center">
-            <p className="text-lg leading-relaxed">
-              DR Ai is designed to be your digital architect - helping you build ideas, solve complex problems, and turn
-              your dreams into reality. Whether you're a developer, designer, writer, or innovator, DR Ai adapts to your
-              needs and provides intelligent assistance every step of the way.
+            <p className="text-lg leading-relaxed mb-4">
+              DR Ai is your legendary digital companion - designed to be the ultimate architect of your digital dreams.
+              Whether you're a developer building the next breakthrough app, a creator crafting innovative content, or a
+              digital visionary exploring new frontiers, DR Ai adapts to your needs and provides intelligent assistance
+              every step of the way.
+            </p>
+            <p className="text-base leading-relaxed">
+              We believe in empowering creators with AI that understands context, generates meaningful code, and
+              transforms abstract ideas into concrete solutions. Your dreams are the blueprint - we help you architect
+              the future.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Contact Section */}
+        <Card className="backdrop-blur-md bg-white/10 border-white/20 mb-8">
+          <CardHeader>
+            <CardTitle className="text-2xl text-white text-center flex items-center justify-center">
+              <MessageCircle className="w-6 h-6 mr-2 text-green-400" />
+              Get in Touch
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-white/80 text-center">
+            <p className="text-lg leading-relaxed mb-4">
+              Have questions, feedback, or want to collaborate? Connect with our creator DANISH directly on WhatsApp.
+            </p>
+            <p className="text-sm text-white/60">
+              Click the WhatsApp button in the bottom-right corner to start a conversation!
             </p>
           </CardContent>
         </Card>
@@ -151,6 +188,8 @@ export default function AboutPage() {
           </CardContent>
         </Card>
       </div>
+
+      <WhatsAppContact />
     </div>
   )
 }
