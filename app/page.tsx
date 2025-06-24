@@ -5,24 +5,28 @@ import type React from "react"
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import {
   Send,
+  Bot,
   Settings,
   History,
   UserCircle,
+  Code,
   Sparkles,
+  Zap,
   Upload,
   Download,
   ImageIcon,
+  Wand2,
   Loader2,
   AlertCircle,
-  Menu,
-  X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { ChatMessage } from "@/components/chat-message"
-import { generateResponse } from "@/utils/gemini-api"
+import { generateAIResponse, checkServerApiKey } from "@/app/actions/gemini"
+import { generateResponseWithUserKey } from "@/utils/gemini-api"
 import { saveChat, loadChats } from "@/utils/local-storage"
 import Image from "next/image"
 
@@ -42,12 +46,11 @@ export default function HomePage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [dragActive, setDragActive] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [hasApiKey, setHasApiKey] = useState(false)
+  const [hasServerApiKey, setHasServerApiKey] = useState(false)
+  const [hasUserApiKey, setHasUserApiKey] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const chatContainerRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = useCallback(() => {
     if (messagesEndRef.current) {
@@ -60,10 +63,27 @@ export default function HomePage() {
   }, [messages, scrollToBottom])
 
   useEffect(() => {
-    // Check for API key
-    const apiKey = process.env.GEMINI_API_KEY || localStorage.getItem("gemini-api-key")
-    setHasApiKey(!!apiKey)
+    // Check for server API key
+    const checkKeys = async () => {
+      const serverKey = await checkServerApiKey()
+      const userKey = !!localStorage.getItem("gemini-api-key")
+      setHasServerApiKey(serverKey)
+      setHasUserApiKey(userKey)
+    }
+
+    checkKeys()
+
+    // Listen for storage changes
+    const handleStorageChange = () => {
+      const userKey = !!localStorage.getItem("gemini-api-key")
+      setHasUserApiKey(userKey)
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    return () => window.removeEventListener("storage", handleStorageChange)
   }, [])
+
+  const hasAnyApiKey = hasServerApiKey || hasUserApiKey
 
   const welcomeMessage = useMemo(
     () => ({
@@ -81,12 +101,19 @@ I'm your legendary digital companion, designed to transform your ideas into real
 • **Technical documentation** and analysis
 • **Image analysis** and visual understanding
 • **File processing** and content generation
+• **Future-tech exploration** and planning
 
-Ready to architect the future together? ${hasApiKey ? "Let's start building!" : "Configure your API key in Settings to unlock full capabilities."}`,
+🔥 **Features:**
+• **Upload images** for AI analysis
+• **Generate content** with advanced AI
+• **Download conversations** and files
+• **Multi-modal interactions** with text and images
+
+Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!" : "Configure your API key in Settings to unlock full capabilities."}`,
       role: "assistant" as const,
       timestamp: new Date(),
     }),
-    [hasApiKey],
+    [hasAnyApiKey],
   )
 
   useEffect(() => {
@@ -146,7 +173,7 @@ Ready to architect the future together? ${hasApiKey ? "Let's start building!" : 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
-      if ((!input.trim() && !selectedImage) || isLoading || !hasApiKey) return
+      if ((!input.trim() && !selectedImage) || isLoading) return
 
       setError(null)
       const userMessage: Message = {
@@ -164,7 +191,19 @@ Ready to architect the future together? ${hasApiKey ? "Let's start building!" : 
       setIsLoading(true)
 
       try {
-        const response = await generateResponse(input.trim() || "Please analyze this image", selectedImage || undefined)
+        let response: string
+
+        // Use server action if server API key is available, otherwise use user's key
+        if (hasServerApiKey) {
+          response = await generateAIResponse(input.trim() || "Please analyze this image", selectedImage || undefined)
+        } else if (hasUserApiKey) {
+          response = await generateResponseWithUserKey(
+            input.trim() || "Please analyze this image",
+            selectedImage || undefined,
+          )
+        } else {
+          throw new Error("No API key configured. Please set up your API key in Settings.")
+        }
 
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -181,13 +220,21 @@ Ready to architect the future together? ${hasApiKey ? "Let's start building!" : 
         })
       } catch (error) {
         console.error("Chat error:", error)
-        setError(error instanceof Error ? error.message : "Failed to get response")
+        setError(error instanceof Error ? error.message : "Failed to get response. Please try again.")
       } finally {
         setIsLoading(false)
       }
     },
-    [input, selectedImage, isLoading, hasApiKey],
+    [input, selectedImage, isLoading, hasServerApiKey, hasUserApiKey],
   )
+
+  const handleGenerate = useCallback(() => {
+    if (!input.trim() && !selectedImage) {
+      inputRef.current?.focus()
+      return
+    }
+    handleSubmit({ preventDefault: () => {} } as React.FormEvent)
+  }, [input, selectedImage, handleSubmit])
 
   const handleNewChat = useCallback(() => {
     setMessages([welcomeMessage])
@@ -195,6 +242,22 @@ Ready to architect the future together? ${hasApiKey ? "Let's start building!" : 
     setSelectedImage(null)
     setError(null)
   }, [welcomeMessage])
+
+  const downloadChat = useCallback(() => {
+    if (messages.length === 0) return
+
+    const chatContent = messages.map((msg) => `${msg.role === "user" ? "You" : "DR Ai"}: ${msg.content}`).join("\n\n")
+
+    const blob = new Blob([chatContent], { type: "text/plain;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `dr-ai-chat-${new Date().toISOString().split("T")[0]}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }, [messages])
 
   const downloadImage = useCallback(() => {
     if (!selectedImage) return
@@ -207,23 +270,21 @@ Ready to architect the future together? ${hasApiKey ? "Let's start building!" : 
     document.body.removeChild(a)
   }, [selectedImage])
 
-  const canSend = hasApiKey && (input.trim() || selectedImage) && !isLoading
-
   return (
     <div
-      className="h-screen overflow-hidden flex flex-col relative"
+      className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden"
       onDragEnter={handleDrag}
       onDragLeave={handleDrag}
       onDragOver={handleDrag}
       onDrop={handleDrop}
     >
-      {/* Background */}
-      <div className="absolute inset-0 bg-grid opacity-30"></div>
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-grid"></div>
 
       {/* Drag Overlay */}
       {dragActive && (
         <div className="fixed inset-0 z-50 bg-purple-500/20 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 shadow-2xl">
+          <div className="card-bg p-8 rounded-2xl border-2 border-dashed border-purple-400">
             <Upload className="w-16 h-16 text-purple-400 mx-auto mb-4" />
             <p className="text-xl font-semibold text-primary text-center">Drop your image here</p>
             <p className="text-muted text-center mt-2">I'll analyze it for you</p>
@@ -232,34 +293,27 @@ Ready to architect the future together? ${hasApiKey ? "Let's start building!" : 
       )}
 
       {/* Header */}
-      <header className="flex-shrink-0 bg-white/5 backdrop-blur-md border-b border-white/10 relative z-10">
-        <div className="flex items-center justify-between px-4 py-3">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/10 border-b border-white/20">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-secondary hover:text-primary lg:hidden"
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-lg">
+            <div className="relative gpu-accelerated">
+              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg">
                 <Image
                   src="/dr-ai-logo.jpg"
-                  alt="DR Ai"
-                  width={40}
-                  height={40}
+                  alt="DR Ai Logo"
+                  width={48}
+                  height={48}
                   className="w-full h-full object-cover"
                   priority
                 />
               </div>
-              <div>
-                <h1 className="text-lg font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                  DR Ai
-                </h1>
-                <p className="text-xs text-secondary">Dream Architect Intelligence</p>
-              </div>
+              <Sparkles className="w-3 h-3 text-yellow-400 absolute -top-1 -right-1 animate-pulse" />
+            </div>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                DR Ai
+              </h1>
+              <p className="text-xs text-secondary font-medium">Dream Architect Intelligence</p>
             </div>
           </div>
 
@@ -268,201 +322,241 @@ Ready to architect the future together? ${hasApiKey ? "Let's start building!" : 
               onClick={handleNewChat}
               variant="ghost"
               size="sm"
-              className="text-secondary hover:text-primary hidden sm:flex"
+              className="text-secondary hover:text-primary border border-opacity-30 hidden sm:flex focus-ring"
+              aria-label="Start new chat session"
             >
-              New Chat
+              <Zap className="w-4 h-4 mr-2" />
+              New Session
             </Button>
+
+            <Button
+              onClick={downloadChat}
+              variant="ghost"
+              size="sm"
+              className="text-secondary hover:text-primary focus-ring"
+              disabled={messages.length <= 1}
+              aria-label="Download chat history"
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+
             <ThemeSwitcher />
-            <div className="hidden lg:flex items-center space-x-1">
-              <Link href="/history">
-                <Button variant="ghost" size="sm" className="text-secondary hover:text-primary">
-                  <History className="w-4 h-4" />
-                </Button>
-              </Link>
-              <Link href="/profile">
-                <Button variant="ghost" size="sm" className="text-secondary hover:text-primary">
-                  <UserCircle className="w-4 h-4" />
-                </Button>
-              </Link>
-              <Link href="/settings">
-                <Button variant="ghost" size="sm" className="text-secondary hover:text-primary">
-                  <Settings className="w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
+
+            <Link href="/history" aria-label="View chat history">
+              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring">
+                <History className="w-4 h-4" />
+              </Button>
+            </Link>
+
+            <Link href="/profile" aria-label="View profile">
+              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring">
+                <UserCircle className="w-4 h-4" />
+              </Button>
+            </Link>
+
+            <Link href="/settings" aria-label="Open settings">
+              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring">
+                <Settings className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         </div>
-
-        {/* API Key Warning */}
-        {!hasApiKey && (
-          <div className="px-4 py-2 bg-yellow-500/10 border-b border-yellow-500/20">
-            <div className="flex items-center space-x-2 text-yellow-400 text-sm">
-              <AlertCircle className="w-4 h-4" />
-              <span>Configure your API key in Settings for full functionality</span>
-            </div>
-          </div>
-        )}
       </header>
 
-      {/* Mobile Sidebar */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
-          <div className="absolute right-0 top-0 h-full w-64 bg-white/10 backdrop-blur-md border-l border-white/20 p-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-primary">Menu</h2>
-              <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(false)}>
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="space-y-2">
-              <Link href="/history" onClick={() => setSidebarOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-secondary hover:text-primary">
-                  <History className="w-4 h-4 mr-3" />
-                  History
-                </Button>
-              </Link>
-              <Link href="/profile" onClick={() => setSidebarOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-secondary hover:text-primary">
-                  <UserCircle className="w-4 h-4 mr-3" />
-                  Profile
-                </Button>
-              </Link>
-              <Link href="/settings" onClick={() => setSidebarOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-secondary hover:text-primary">
-                  <Settings className="w-4 h-4 mr-3" />
-                  Settings
-                </Button>
-              </Link>
+      {/* Tagline Banner */}
+      <div className="card-bg border-b border-white/20">
+        <div className="container mx-auto px-4 py-2 text-center">
+          <p className="text-base md:text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
+            <Code className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
+            Code your dreams. Architect your future.
+          </p>
+        </div>
+      </div>
+
+      {/* API Integration Notice */}
+      {!hasAnyApiKey && (
+        <div className="card-bg border-b border-white/20">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-center space-x-2 text-yellow-400">
+              <AlertCircle className="w-5 h-5" />
+              <span className="text-sm font-medium">
+                AI Integration Required: Configure your AI service in{" "}
+                <Link href="/settings" className="underline hover:text-yellow-300">
+                  API Integration
+                </Link>{" "}
+                to unlock the full potential of DR Ai.
+              </span>
             </div>
           </div>
         </div>
       )}
 
       {/* Chat Container */}
-      <div className="flex-1 flex flex-col min-h-0 relative">
-        {/* Messages Area */}
-        <div
-          ref={chatContainerRef}
-          className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth"
-          style={{ scrollbarWidth: "thin" }}
-        >
-          {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
-          ))}
+      <div className="container mx-auto px-4 py-6 max-w-5xl relative z-10">
+        <Card className="h-[calc(100vh-280px)] card-bg flex flex-col shadow-2xl">
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {messages.map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))}
 
-          {/* Loading State */}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="flex items-center space-x-3 bg-white/5 backdrop-blur-md rounded-2xl px-4 py-3 border border-white/10">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center">
-                  <div className="w-4 h-4 rounded-md overflow-hidden">
-                    <Image
-                      src="/dr-ai-logo.jpg"
-                      alt="DR Ai"
-                      width={16}
-                      height={16}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+            {isLoading && (
+              <div className="flex items-center space-x-3 text-secondary px-4" role="status" aria-live="polite">
+                <div className="relative">
+                  <Bot className="w-6 h-6" />
+                  <div className="absolute inset-0 bg-purple-500/20 rounded-full animate-ping"></div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
-                  <span className="text-sm text-secondary">AI is thinking...</span>
+                  <span className="text-sm font-medium">Architecting your response...</span>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Error State */}
-          {error && (
-            <div className="flex justify-center">
-              <div className="bg-red-500/10 backdrop-blur-md rounded-2xl px-4 py-3 border border-red-500/20 max-w-md">
-                <div className="flex items-center space-x-2 text-red-400 text-sm">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>{error}</span>
+            {error && (
+              <div className="flex justify-center px-4">
+                <div className="bg-red-500/10 backdrop-blur-md rounded-xl px-4 py-3 border border-red-500/20 max-w-md">
+                  <div className="flex items-center space-x-2 text-red-400 text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{error}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input Area - Integrated into chat container */}
-        <div className="flex-shrink-0 bg-white/5 backdrop-blur-md border-t border-white/10 p-4">
-          {/* Image Preview */}
-          {selectedImage && (
-            <div className="mb-3 relative inline-block">
-              <img
-                src={selectedImage || "/placeholder.svg"}
-                alt="Selected for analysis"
-                className="max-w-20 max-h-20 rounded-xl shadow-lg"
-              />
-              <Button
-                onClick={() => setSelectedImage(null)}
-                size="sm"
-                variant="destructive"
-                className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full"
-              >
-                ×
-              </Button>
-              <Button
-                onClick={downloadImage}
-                size="sm"
-                variant="ghost"
-                className="absolute -bottom-2 -left-2 w-6 h-6 p-0 rounded-full bg-black/50 hover:bg-black/70 text-white"
-              >
-                <Download className="w-3 h-3" />
-              </Button>
-            </div>
-          )}
+            <div ref={messagesEndRef} />
+          </div>
 
           {/* Input Form */}
-          <form onSubmit={handleSubmit} className="flex items-end space-x-3">
-            <div className="flex-1 relative">
-              <div className="flex items-center bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden">
+          <div className="p-6 border-t card-bg">
+            {/* Image Preview */}
+            {selectedImage && (
+              <div className="mb-4 relative inline-block">
+                <img
+                  src={selectedImage || "/placeholder.svg"}
+                  alt="Selected for analysis"
+                  className="max-w-32 max-h-32 rounded-lg shadow-lg"
+                />
+                <Button
+                  onClick={() => setSelectedImage(null)}
+                  size="sm"
+                  variant="destructive"
+                  className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full"
+                  aria-label="Remove selected image"
+                >
+                  ×
+                </Button>
+                <Button
+                  onClick={downloadImage}
+                  size="sm"
+                  variant="ghost"
+                  className="absolute -bottom-2 -left-2 w-6 h-6 p-0 rounded-full bg-black/50 hover:bg-black/70 text-white"
+                  aria-label="Download image"
+                >
+                  <Download className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+              {/* File Upload Controls */}
+              <div className="flex space-x-2">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-secondary hover:text-primary p-3"
+                  className="text-secondary hover:text-primary focus-ring"
+                  aria-label="Upload image"
                   disabled={isLoading}
                 >
-                  <ImageIcon className="w-5 h-5" />
+                  <ImageIcon className="w-4 h-4" />
                 </Button>
 
-                <Input
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder={hasApiKey ? "Message DR Ai..." : "Configure API key in Settings to start chatting..."}
-                  className="flex-1 border-0 bg-transparent text-primary placeholder:text-muted focus-visible:ring-0 focus-visible:ring-offset-0 py-3 px-2"
-                  disabled={isLoading || !hasApiKey}
-                  maxLength={2000}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  aria-label="Select image file"
                 />
-
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
               </div>
+
+              {/* Text Input */}
+              <Input
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={
+                  hasAnyApiKey
+                    ? "Describe your vision, upload an image, or ask me anything..."
+                    : "Configure AI integration to start architecting..."
+                }
+                className="flex-1 input-bg text-primary text-base md:text-lg py-4 md:py-6 focus-ring"
+                disabled={isLoading}
+                aria-label="Chat input"
+              />
+
+              {/* Action Buttons */}
+              <div className="flex space-x-2">
+                <Button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={isLoading || (!input.trim() && !selectedImage) || !hasAnyApiKey}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 px-4 py-4 md:py-6 font-semibold focus-ring"
+                  aria-label="Generate AI response"
+                >
+                  <Wand2 className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="hidden sm:inline ml-2">Generate</span>
+                </Button>
+
+                <Button
+                  type="submit"
+                  disabled={isLoading || (!input.trim() && !selectedImage) || !hasAnyApiKey}
+                  className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 disabled:opacity-50 px-4 py-4 md:py-6 font-semibold focus-ring"
+                  aria-label="Send message"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4 md:w-5 md:h-5" />
+                  )}
+                </Button>
+              </div>
+            </form>
+
+            {/* Footer Info */}
+            <div className="flex items-center justify-center mt-4 text-sm text-muted">
+              <Sparkles className="w-4 h-4 mr-2" />
+              <span>Advanced AI Architecture • Built for visionaries and innovators</span>
             </div>
+          </div>
+        </Card>
+      </div>
 
-            <Button
-              type="submit"
-              disabled={!canSend}
-              className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl p-3 shadow-lg"
-            >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-            </Button>
-          </form>
-
-          {/* Footer */}
-          <div className="flex items-center justify-center mt-3 text-xs text-muted">
-            <Sparkles className="w-3 h-3 mr-2" />
-            <span>Built for visionaries and innovators</span>
+      {/* Footer */}
+      <footer className="mt-8 py-8 border-t card-bg">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-secondary">
+            <Link href="/about" className="hover:text-primary font-medium focus-ring transition-colors">
+              About
+            </Link>
+            <Link href="/terms" className="hover:text-primary font-medium focus-ring transition-colors">
+              Terms
+            </Link>
+            <Link href="/privacy" className="hover:text-primary font-medium focus-ring transition-colors">
+              Privacy
+            </Link>
+            <Link href="/policy" className="hover:text-primary font-medium focus-ring transition-colors">
+              Policy
+            </Link>
+          </div>
+          <div className="text-center mt-6 text-sm text-muted">
+            © 2025 DR Ai - Dream Architect Intelligence • Shaping tomorrow's digital landscape
           </div>
         </div>
-      </div>
+      </footer>
     </div>
   )
 }

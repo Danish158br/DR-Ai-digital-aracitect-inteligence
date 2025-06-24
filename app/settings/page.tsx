@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Save, Key, Palette, Volume2, Eye, EyeOff } from "lucide-react"
+import { Save, Key, Palette, Volume2, Eye, EyeOff, CheckCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from "next/link"
 import { useTheme } from "@/components/theme-provider"
 import { validateApiKey, testApiConnection } from "@/utils/gemini-api"
+import { checkServerApiKey } from "@/app/actions/gemini"
 import Image from "next/image"
 
 export default function SettingsPage() {
@@ -24,19 +25,26 @@ export default function SettingsPage() {
   const [memoryEnabled, setMemoryEnabled] = useState(true)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState("")
+  const [hasServerApiKey, setHasServerApiKey] = useState(false)
 
   useEffect(() => {
-    const savedApiKey = localStorage.getItem("gemini-api-key") || ""
-    const savedFontSize = localStorage.getItem("dr-ai-font-size")
-    const savedSound = localStorage.getItem("dr-ai-sound-enabled")
-    const savedAnimations = localStorage.getItem("dr-ai-animations-enabled")
-    const savedMemory = localStorage.getItem("dr-ai-memory-enabled")
+    const loadSettings = async () => {
+      const savedApiKey = localStorage.getItem("gemini-api-key") || ""
+      const savedFontSize = localStorage.getItem("dr-ai-font-size")
+      const savedSound = localStorage.getItem("dr-ai-sound-enabled")
+      const savedAnimations = localStorage.getItem("dr-ai-animations-enabled")
+      const savedMemory = localStorage.getItem("dr-ai-memory-enabled")
+      const serverKey = await checkServerApiKey()
 
-    setApiKey(savedApiKey)
-    setFontSize(savedFontSize ? [Number.parseInt(savedFontSize)] : [16])
-    setSoundEnabled(savedSound !== "false")
-    setAnimationsEnabled(savedAnimations !== "false")
-    setMemoryEnabled(savedMemory !== "false")
+      setApiKey(savedApiKey)
+      setFontSize(savedFontSize ? [Number.parseInt(savedFontSize)] : [16])
+      setSoundEnabled(savedSound !== "false")
+      setAnimationsEnabled(savedAnimations !== "false")
+      setMemoryEnabled(savedMemory !== "false")
+      setHasServerApiKey(serverKey)
+    }
+
+    loadSettings()
   }, [])
 
   const handleSave = async () => {
@@ -111,22 +119,33 @@ export default function SettingsPage() {
             </Alert>
           )}
 
+          {/* Server API Status */}
+          {hasServerApiKey && (
+            <Alert className="bg-green-500/10 border-green-500/20">
+              <CheckCircle className="w-4 h-4 text-green-400" />
+              <AlertDescription className="text-green-200">
+                Server API key is configured and active. You can use DR Ai without setting up your own key.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* API Configuration */}
           <Card className="card-bg">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-primary">
                 <Key className="w-5 h-5 text-yellow-400" />
-                <span>API Configuration</span>
+                <span>Personal API Configuration</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-secondary">
-                Configure your Gemini API key for enhanced AI capabilities. The app works with built-in intelligence
-                even without an API key.
+                {hasServerApiKey
+                  ? "Optional: Configure your personal Gemini API key for dedicated usage and enhanced features."
+                  : "Configure your Gemini API key to enable AI capabilities. Get your key from Google AI Studio."}
               </p>
               <div>
                 <Label htmlFor="api-key" className="text-primary">
-                  Gemini API Key (Optional)
+                  Gemini API Key {hasServerApiKey ? "(Optional)" : "(Required)"}
                 </Label>
                 <div className="flex space-x-2 mt-1">
                   <Input
@@ -147,6 +166,17 @@ export default function SettingsPage() {
                     {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
                 </div>
+                <p className="text-xs text-muted mt-2">
+                  Get your API key from{" "}
+                  <a
+                    href="https://makersuite.google.com/app/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:underline"
+                  >
+                    Google AI Studio
+                  </a>
+                </p>
               </div>
             </CardContent>
           </Card>

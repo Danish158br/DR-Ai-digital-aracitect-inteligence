@@ -1,10 +1,23 @@
-// Client-side utility for user's own API keys only
-export async function generateResponseWithUserKey(prompt: string, imageData?: string): Promise<string> {
-  // Only use localStorage API key (user's own key)
-  const apiKey = localStorage.getItem("gemini-api-key")
+"use server"
+
+export async function generateAIResponse(prompt: string, imageData?: string): Promise<string> {
+  // Only use server-side environment variable
+  const apiKey = process.env.GEMINI_API_KEY
 
   if (!apiKey) {
-    throw new Error("Please configure your API key in Settings to use this feature.")
+    return `🤖 **DR Ai is ready to help!**
+
+I'm your intelligent digital companion, ready to assist with your projects and ideas. For enhanced capabilities with the latest AI technology, please configure your own API key in Settings.
+
+**I can help you with:**
+• Code architecture and system design
+• Technical problem-solving and debugging  
+• Creative brainstorming and innovation
+• Development guidance and best practices
+• Project planning and documentation
+• Learning new technologies and concepts
+
+**What would you like to architect today?** Share your vision, describe your project, or ask me any technical question!`
   }
 
   if (!prompt.trim()) {
@@ -35,7 +48,7 @@ Please provide a comprehensive, helpful response that aligns with your role as a
       parts.unshift({
         inline_data: {
           mime_type: "image/jpeg",
-          data: imageData.split(",")[1],
+          data: imageData.split(",")[1], // Remove data:image/jpeg;base64, prefix
         },
       })
     }
@@ -110,53 +123,6 @@ Please provide a comprehensive, helpful response that aligns with your role as a
   }
 }
 
-export function validateApiKey(apiKey: string): boolean {
-  return apiKey && apiKey.length > 20 && (apiKey.startsWith("AIza") || apiKey.startsWith("AIzaSy"))
-}
-
-export async function testApiConnection(apiKey: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: "Test connection - respond with 'OK'",
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 10,
-          },
-        }),
-      },
-    )
-
-    if (response.ok) {
-      const data = await response.json()
-      if (data.candidates?.[0]) {
-        return { success: true }
-      }
-    }
-
-    const errorData = await response.json().catch(() => ({}))
-    return {
-      success: false,
-      error: errorData.error?.message || `HTTP ${response.status}`,
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Network error",
-    }
-  }
+export async function checkServerApiKey(): Promise<boolean> {
+  return !!process.env.GEMINI_API_KEY
 }
