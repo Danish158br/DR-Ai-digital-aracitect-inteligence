@@ -9,29 +9,31 @@ export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme()
 
   const themes = [
-    { value: "glass", label: "🌊 Glass", description: "Glassmorphism" },
-    { value: "dark", label: "🌙 Dark", description: "Dark Mode" },
-    { value: "neon", label: "⚡ Neon", description: "Neon Glow" },
-    { value: "light", label: "☀️ Light", description: "Light Mode" },
+    { value: "glass", label: "🌊 Glass", description: "Glassmorphism Fusion" },
+    { value: "dark", label: "🌙 Dark", description: "Quantum Dark Mode" },
+    { value: "neon", label: "⚡ Neon", description: "Cyberpunk Neon" },
+    { value: "light", label: "☀️ Light", description: "Pure Light Mode" },
   ]
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-white/80 hover:text-white">
+        <Button variant="ghost" size="sm" className="text-secondary hover:text-primary btn-hover focus-enhanced">
           <Palette className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="backdrop-blur-md bg-black/80 border-white/20">
+      <DropdownMenuContent className="card-bg border-opacity-50 shadow-xl">
         {themes.map((t) => (
           <DropdownMenuItem
             key={t.value}
             onClick={() => setTheme(t.value as any)}
-            className={`text-white hover:bg-white/10 ${theme === t.value ? "bg-white/20" : ""}`}
+            className={`text-primary hover:bg-opacity-20 btn-hover cursor-pointer focus-enhanced ${
+              theme === t.value ? "bg-purple-500/20" : ""
+            }`}
           >
             <div>
-              <div className="font-medium">{t.label}</div>
-              <div className="text-xs text-white/60">{t.description}</div>
+              <div className="font-medium text-enhanced">{t.label}</div>
+              <div className="text-xs text-muted">{t.description}</div>
             </div>
           </DropdownMenuItem>
         ))}
