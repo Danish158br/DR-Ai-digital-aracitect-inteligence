@@ -1,21 +1,51 @@
+# DR Ai - Dream Architect Intelligence
+# https://dr-ai-dream.vercel.app
+
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
 
 # Sitemap
-Sitemap: https://dr-ai.vercel.app/sitemap.xml
+Sitemap: https://dr-ai-dream.vercel.app/sitemap.xml
 
-# Crawl-delay
+# Crawl-delay for respectful crawling
 Crawl-delay: 1
 
-# Disallow admin or sensitive areas (none for this app)
-# Disallow: /admin/
-
-# Allow all search engines to index the site
+# Specific bot configurations
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 0
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Slurp
 Allow: /
+Crawl-delay: 1
+
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 2
+
+# Block AI training bots (optional)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /

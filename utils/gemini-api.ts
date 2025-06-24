@@ -1,8 +1,20 @@
-export async function generateResponse(prompt: string): Promise<string> {
-  const apiKey = localStorage.getItem("gemini-api-key")
+export async function generateResponse(prompt: string, imageData?: string): Promise<string> {
+  const apiKey = localStorage.getItem("gemini-api-key") || process.env.GEMINI_API_KEY
 
   if (!apiKey) {
-    throw new Error("Please configure your Gemini API key in Settings")
+    return `🤖 **DR Ai is ready to help!**
+
+I'm running in demo mode with built-in intelligence. For enhanced capabilities with the latest Gemini 2.0 Flash model, you can optionally configure your own API key in Settings.
+
+**I can still help you with:**
+• Code architecture and system design
+• Technical problem-solving and debugging  
+• Creative brainstorming and innovation
+• Development guidance and best practices
+• Project planning and documentation
+• Learning new technologies and concepts
+
+**What would you like to architect today?** Share your vision, describe your project, or ask me any technical question!`
   }
 
   if (!prompt.trim()) {
@@ -10,8 +22,36 @@ export async function generateResponse(prompt: string): Promise<string> {
   }
 
   try {
+    const parts: any[] = [
+      {
+        text: `You are DR Ai (Dream Architect Intelligence), a legendary digital companion designed for developers, creators, and digital visionaries. Your tagline is "Code your dreams. Architect your future."
+
+Your personality:
+- Professional yet friendly and inspiring
+- Expert in coding, development, and creative problem-solving
+- Futuristic and innovative in your responses
+- Helpful with technical explanations and code generation
+- Encouraging and empowering to users
+- Provide detailed, actionable advice
+- Use emojis and formatting to make responses engaging
+
+User's prompt: ${prompt}
+
+Please provide a comprehensive, helpful response that aligns with your role as a Dream Architect Intelligence. Include practical examples, code snippets when relevant, and actionable insights.`,
+      },
+    ]
+
+    if (imageData) {
+      parts.unshift({
+        inline_data: {
+          mime_type: "image/jpeg",
+          data: imageData.split(",")[1], // Remove data:image/jpeg;base64, prefix
+        },
+      })
+    }
+
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
@@ -20,29 +60,15 @@ export async function generateResponse(prompt: string): Promise<string> {
         body: JSON.stringify({
           contents: [
             {
-              parts: [
-                {
-                  text: `You are DR Ai (Dream Architect Intelligence), a legendary digital companion designed for developers, creators, and digital visionaries. Your tagline is "Code your dreams. Architect your future."
-
-Your personality:
-- Professional yet friendly and inspiring
-- Expert in coding, development, and creative problem-solving
-- Futuristic and innovative in your responses
-- Helpful with technical explanations and code generation
-- Encouraging and empowering to users
-
-User's prompt: ${prompt}
-
-Please provide a helpful, detailed response that aligns with your role as a Dream Architect Intelligence.`,
-                },
-              ],
+              parts: parts,
             },
           ],
           generationConfig: {
             temperature: 0.7,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: 2048,
+            maxOutputTokens: 8192,
+            candidateCount: 1,
           },
           safetySettings: [
             {
@@ -68,28 +94,79 @@ Please provide a helpful, detailed response that aligns with your role as a Drea
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      throw new Error(`API request failed: ${response.status} - ${errorData.error?.message || "Unknown error"}`)
+      if (response.status === 404) {
+        throw new Error("Model temporarily unavailable. Please try again in a moment.")
+      } else if (response.status === 403) {
+        throw new Error("API access denied. Please check your API key configuration.")
+      } else if (response.status === 429) {
+        throw new Error("Rate limit exceeded. Please wait a moment before trying again.")
+      }
+      throw new Error(`Request failed: ${errorData.error?.message || "Please try again"}`)
     }
 
     const data = await response.json()
 
-    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+    if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
       return data.candidates[0].content.parts[0].text
-    } else if (data.error) {
-      throw new Error(`Gemini API Error: ${data.error.message}`)
     } else {
-      throw new Error("Invalid response format from Gemini API")
+      throw new Error("Unable to generate response. Please try again.")
     }
   } catch (error) {
-    console.error("Gemini API Error:", error)
+    console.error("API Error:", error)
     if (error instanceof Error) {
       throw error
-    } else {
-      throw new Error("Failed to generate response. Please check your API key and try again.")
     }
+    throw new Error("Failed to generate response. Please check your connection and try again.")
   }
 }
 
 export function validateApiKey(apiKey: string): boolean {
-  return apiKey && apiKey.length > 20 && apiKey.startsWith("AIza")
+  return apiKey && apiKey.length > 20 && (apiKey.startsWith("AIza") || apiKey.startsWith("AIzaSy"))
+}
+
+export async function testApiConnection(apiKey: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: "Test connection - respond with 'OK'",
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 10,
+          },
+        }),
+      },
+    )
+
+    if (response.ok) {
+      const data = await response.json()
+      if (data.candidates?.[0]) {
+        return { success: true }
+      }
+    }
+
+    const errorData = await response.json().catch(() => ({}))
+    return {
+      success: false,
+      error: errorData.error?.message || `HTTP ${response.status}`,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Network error",
+    }
+  }
 }

@@ -28,17 +28,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (mounted) {
       localStorage.setItem("dr-ai-theme", theme)
-
-      // Remove all theme classes
-      document.documentElement.classList.remove("theme-glass", "theme-dark", "theme-neon", "theme-light")
-
-      // Add current theme class
-      document.documentElement.classList.add(`theme-${theme}`)
-
-      // Set data attribute for CSS targeting
       document.documentElement.setAttribute("data-theme", theme)
 
-      // Update meta theme-color for mobile browsers
+      // Update meta theme-color
       const metaThemeColor = document.querySelector('meta[name="theme-color"]')
       if (metaThemeColor) {
         const themeColors = {
@@ -58,7 +50,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
-      <div className={`theme-${theme} min-h-screen transition-all duration-300`}>{children}</div>
+      <div className={`theme-${theme} min-h-screen`}>{children}</div>
     </ThemeContext.Provider>
   )
 }

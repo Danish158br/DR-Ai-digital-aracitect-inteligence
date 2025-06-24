@@ -1,12 +1,15 @@
 {
   "name": "DR Ai - Dream Architect Intelligence",
   "short_name": "DR Ai",
-  "description": "Advanced AI chatbot powered by Google Gemini LLM",
+  "description": "Revolutionary AI-powered development assistant that transforms ideas into code using advanced Gemini 2.0 Flash technology",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#8b5cf6",
   "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/icon-192x192.png",
@@ -19,9 +22,52 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
   ],
-  "categories": ["productivity", "utilities", "education"],
-  "lang": "en",
-  "dir": "ltr"
+  "categories": ["productivity", "utilities", "education", "developer"],
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-narrow.png",
+      "sizes": "640x1136",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Chat",
+      "short_name": "New Chat",
+      "description": "Start a new conversation with DR Ai",
+      "url": "/?new=true",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "short_name": "Settings",
+      "description": "Configure DR Ai settings",
+      "url": "/settings",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }
