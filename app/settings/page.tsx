@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bot, Save, Key, Palette, Volume2, Eye, EyeOff } from "lucide-react"
+import { Save, Key, Palette, Volume2, Eye, EyeOff } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from "next/link"
 import { useTheme } from "@/components/theme-provider"
 import { validateApiKey, testApiConnection } from "@/utils/gemini-api"
+import Image from "next/image"
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
@@ -54,6 +55,8 @@ export default function SettingsPage() {
           return
         }
         localStorage.setItem("gemini-api-key", apiKey)
+      } else {
+        localStorage.removeItem("gemini-api-key")
       }
 
       localStorage.setItem("dr-ai-font-size", fontSize[0].toString())
@@ -72,14 +75,22 @@ export default function SettingsPage() {
     <div className="min-h-screen">
       <header className="sticky top-0 z-40 card-bg border-b">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <Bot className="w-8 h-8 text-purple-400" />
+          <Link href="/" className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg">
+              <Image
+                src="/dr-ai-logo.jpg"
+                alt="DR Ai Logo"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+              />
+            </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               Settings
             </h1>
           </Link>
           <Link href="/">
-            <Button variant="ghost" className="text-muted hover:text-primary">
+            <Button variant="ghost" className="text-secondary hover:text-primary">
               Back to Chat
             </Button>
           </Link>
@@ -100,21 +111,22 @@ export default function SettingsPage() {
             </Alert>
           )}
 
-          {/* API Configuration - Optional */}
+          {/* API Configuration */}
           <Card className="card-bg">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-primary">
                 <Key className="w-5 h-5 text-yellow-400" />
-                <span>API Configuration (Optional)</span>
+                <span>API Configuration</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted">
-                DR Ai works great out of the box. Optionally add your own Gemini API key for enhanced capabilities.
+              <p className="text-sm text-secondary">
+                Configure your Gemini API key for enhanced AI capabilities. The app works with built-in intelligence
+                even without an API key.
               </p>
               <div>
                 <Label htmlFor="api-key" className="text-primary">
-                  Gemini API Key
+                  Gemini API Key (Optional)
                 </Label>
                 <div className="flex space-x-2 mt-1">
                   <Input
@@ -122,7 +134,7 @@ export default function SettingsPage() {
                     type={showApiKey ? "text" : "password"}
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="Enter your Gemini API key (optional)"
+                    placeholder="Enter your Gemini API key"
                     className="flex-1 input-bg text-primary"
                   />
                   <Button
@@ -130,7 +142,7 @@ export default function SettingsPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowApiKey(!showApiKey)}
-                    className="text-muted hover:text-primary"
+                    className="text-secondary hover:text-primary"
                   >
                     {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
@@ -192,7 +204,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-primary">Sound Effects</Label>
-                  <p className="text-xs text-muted">Play sounds for notifications</p>
+                  <p className="text-xs text-secondary">Play sounds for notifications</p>
                 </div>
                 <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} />
               </div>
@@ -200,7 +212,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-primary">Animations</Label>
-                  <p className="text-xs text-muted">Enable smooth animations</p>
+                  <p className="text-xs text-secondary">Enable smooth animations</p>
                 </div>
                 <Switch checked={animationsEnabled} onCheckedChange={setAnimationsEnabled} />
               </div>
@@ -208,7 +220,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-primary">Chat Memory</Label>
-                  <p className="text-xs text-muted">Remember conversation context</p>
+                  <p className="text-xs text-secondary">Remember conversation context</p>
                 </div>
                 <Switch checked={memoryEnabled} onCheckedChange={setMemoryEnabled} />
               </div>

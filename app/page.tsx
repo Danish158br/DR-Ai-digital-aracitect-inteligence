@@ -15,16 +15,15 @@ import {
   Upload,
   Download,
   ImageIcon,
-  Wand2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { ChatMessage } from "@/components/chat-message"
 import { generateResponse } from "@/utils/gemini-api"
 import { saveChat, loadChats } from "@/utils/local-storage"
+import Image from "next/image"
 
 interface Message {
   id: string
@@ -62,7 +61,7 @@ export default function HomePage() {
 
 ✨ **Code your dreams. Architect your future.**
 
-I'm your legendary digital companion, powered by **Gemini 2.0 Flash**, designed to transform your ideas into reality. Whether you're architecting complex systems, crafting innovative solutions, or exploring the frontiers of technology, I'm here to amplify your creative potential.
+I'm your legendary digital companion, designed to transform your ideas into reality. Whether you're architecting complex systems, crafting innovative solutions, or exploring the frontiers of technology, I'm here to amplify your creative potential.
 
 🎯 **What I can help you with:**
 • **Advanced code generation** and optimization
@@ -73,7 +72,7 @@ I'm your legendary digital companion, powered by **Gemini 2.0 Flash**, designed 
 • **File processing** and content generation
 • **Future-tech exploration** and planning
 
-🔥 **New Features:**
+🔥 **Features:**
 • **Upload images** for AI analysis
 • **Generate content** with advanced AI
 • **Download conversations** and files
@@ -190,7 +189,7 @@ I'm experiencing connectivity issues. This could be due to:
 🔧 **Quick Solutions:**
 • Check your internet connection
 • Try again in a few moments
-• Configure your API key in Settings (optional)
+• Configure your API key in Settings if needed
 
 I'll be back online shortly to continue architecting your dreams!`,
           role: "assistant",
@@ -204,14 +203,6 @@ I'll be back online shortly to continue architecting your dreams!`,
     },
     [input, selectedImage, isLoading],
   )
-
-  const handleGenerate = useCallback(() => {
-    if (!input.trim() && !selectedImage) {
-      inputRef.current?.focus()
-      return
-    }
-    handleSubmit({ preventDefault: () => {} } as React.FormEvent)
-  }, [input, selectedImage, handleSubmit])
 
   const handleNewChat = useCallback(() => {
     setMessages([welcomeMessage])
@@ -270,23 +261,30 @@ I'll be back online shortly to continue architecting your dreams!`,
 
       {/* Header */}
       <header className="sticky top-0 z-40 card-bg border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
             <div className="relative gpu-accelerated">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-                <Bot className="w-7 h-7 text-white" />
+              <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg">
+                <Image
+                  src="/dr-ai-logo.jpg"
+                  alt="DR Ai Logo"
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-cover"
+                  priority
+                />
               </div>
-              <Sparkles className="w-4 h-4 text-yellow-400 absolute -top-1 -right-1" />
+              <Sparkles className="w-4 h-4 text-yellow-400 absolute -top-1 -right-1 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
                 DR Ai
               </h1>
-              <p className="text-sm text-secondary font-medium">Dream Architect Intelligence</p>
+              <p className="text-xs md:text-sm text-secondary font-medium">Dream Architect Intelligence</p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 md:space-x-3">
+          <div className="flex items-center space-x-2">
             <Button
               onClick={handleNewChat}
               variant="ghost"
@@ -313,19 +311,19 @@ I'll be back online shortly to continue architecting your dreams!`,
 
             <Link href="/history" aria-label="View chat history">
               <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring">
-                <History className="w-5 h-5" />
+                <History className="w-4 h-4" />
               </Button>
             </Link>
 
             <Link href="/profile" aria-label="View profile">
               <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring">
-                <UserCircle className="w-5 h-5" />
+                <UserCircle className="w-4 h-4" />
               </Button>
             </Link>
 
             <Link href="/settings" aria-label="Open settings">
               <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring">
-                <Settings className="w-5 h-5" />
+                <Settings className="w-4 h-4" />
               </Button>
             </Link>
           </div>
@@ -334,25 +332,25 @@ I'll be back online shortly to continue architecting your dreams!`,
 
       {/* Tagline Banner */}
       <div className="card-bg border-b">
-        <div className="container mx-auto px-4 py-3 text-center">
-          <p className="text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
-            <Code className="w-5 h-5 inline mr-2" />
+        <div className="container mx-auto px-4 py-2 text-center">
+          <p className="text-base md:text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
+            <Code className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
             Code your dreams. Architect your future.
           </p>
         </div>
       </div>
 
       {/* Chat Container */}
-      <div className="container mx-auto px-4 py-6 max-w-5xl relative z-10">
-        <Card className="h-[calc(100vh-280px)] card-bg flex flex-col shadow-2xl">
+      <div className="container mx-auto px-2 md:px-4 py-4 max-w-5xl relative z-10">
+        <div className="h-[calc(100vh-220px)] flex flex-col">
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto px-2 md:px-4 py-2 space-y-4">
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
 
             {isLoading && (
-              <div className="flex items-center space-x-3 text-secondary" role="status" aria-live="polite">
+              <div className="flex items-center space-x-3 text-secondary px-4" role="status" aria-live="polite">
                 <div className="relative">
                   <Bot className="w-6 h-6" />
                   <div className="absolute inset-0 bg-purple-500/20 rounded-full animate-ping"></div>
@@ -376,14 +374,14 @@ I'll be back online shortly to continue architecting your dreams!`,
           </div>
 
           {/* Input Form */}
-          <div className="p-4 md:p-6 border-t card-bg">
+          <div className="p-3 md:p-4 card-bg border-t">
             {/* Image Preview */}
             {selectedImage && (
-              <div className="mb-4 relative inline-block">
+              <div className="mb-3 relative inline-block">
                 <img
                   src={selectedImage || "/placeholder.svg"}
                   alt="Selected for analysis"
-                  className="max-w-32 max-h-32 rounded-lg shadow-lg"
+                  className="max-w-24 max-h-24 md:max-w-32 md:max-h-32 rounded-lg shadow-lg"
                 />
                 <Button
                   onClick={() => setSelectedImage(null)}
@@ -406,29 +404,27 @@ I'll be back online shortly to continue architecting your dreams!`,
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-              {/* File Upload Controls */}
-              <div className="flex space-x-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="text-secondary hover:text-primary focus-ring"
-                  aria-label="Upload image"
-                >
-                  <ImageIcon className="w-4 h-4" />
-                </Button>
+            <form onSubmit={handleSubmit} className="flex gap-2 md:gap-3">
+              {/* File Upload */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-secondary hover:text-primary focus-ring flex-shrink-0"
+                aria-label="Upload image"
+              >
+                <ImageIcon className="w-4 h-4" />
+              </Button>
 
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  aria-label="Select image file"
-                />
-              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                aria-label="Select image file"
+              />
 
               {/* Text Input */}
               <Input
@@ -436,48 +432,35 @@ I'll be back online shortly to continue architecting your dreams!`,
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Describe your vision, upload an image, or ask me anything..."
-                className="flex-1 input-bg text-primary text-base md:text-lg py-4 md:py-6 focus-ring"
+                className="flex-1 input-bg text-primary text-sm md:text-base py-3 md:py-4 focus-ring"
                 disabled={isLoading}
                 aria-label="Chat input"
               />
 
-              {/* Action Buttons */}
-              <div className="flex space-x-2">
-                <Button
-                  type="button"
-                  onClick={handleGenerate}
-                  disabled={isLoading || (!input.trim() && !selectedImage)}
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 px-4 py-4 md:py-6 font-semibold focus-ring"
-                  aria-label="Generate AI response"
-                >
-                  <Wand2 className="w-4 h-4 md:w-5 md:h-5" />
-                  <span className="hidden sm:inline ml-2">Generate</span>
-                </Button>
-
-                <Button
-                  type="submit"
-                  disabled={isLoading || (!input.trim() && !selectedImage)}
-                  className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 disabled:opacity-50 px-4 py-4 md:py-6 font-semibold focus-ring"
-                  aria-label="Send message"
-                >
-                  <Send className="w-4 h-4 md:w-5 md:h-5" />
-                </Button>
-              </div>
+              {/* Send Button */}
+              <Button
+                type="submit"
+                disabled={isLoading || (!input.trim() && !selectedImage)}
+                className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 disabled:opacity-50 px-4 py-3 md:py-4 font-semibold focus-ring flex-shrink-0"
+                aria-label="Send message"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
             </form>
 
             {/* Footer Info */}
-            <div className="flex items-center justify-center mt-4 text-sm text-muted">
-              <Sparkles className="w-4 h-4 mr-2" />
-              <span>Powered by Gemini 2.0 Flash • Built for visionaries and innovators</span>
+            <div className="flex items-center justify-center mt-3 text-xs md:text-sm text-muted">
+              <Sparkles className="w-3 h-3 md:w-4 md:h-4 mr-2" />
+              <span>Built for visionaries and innovators</span>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Footer */}
-      <footer className="mt-8 py-8 border-t card-bg">
+      <footer className="py-6 border-t card-bg">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-secondary">
+          <div className="flex flex-wrap justify-center gap-4 text-xs md:text-sm text-secondary">
             <Link href="/about" className="hover:text-primary font-medium focus-ring transition-colors">
               About
             </Link>
@@ -491,7 +474,7 @@ I'll be back online shortly to continue architecting your dreams!`,
               Policy
             </Link>
           </div>
-          <div className="text-center mt-6 text-sm text-muted">
+          <div className="text-center mt-4 text-xs md:text-sm text-muted">
             © 2025 DR Ai - Dream Architect Intelligence • Shaping tomorrow's digital landscape
           </div>
         </div>

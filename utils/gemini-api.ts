@@ -1,12 +1,13 @@
 export async function generateResponse(prompt: string, imageData?: string): Promise<string> {
-  const apiKey = localStorage.getItem("gemini-api-key") || process.env.GEMINI_API_KEY
+  // First try environment variable, then localStorage
+  const apiKey = process.env.GEMINI_API_KEY || localStorage.getItem("gemini-api-key")
 
   if (!apiKey) {
     return `🤖 **DR Ai is ready to help!**
 
-I'm running in demo mode with built-in intelligence. For enhanced capabilities with the latest Gemini 2.0 Flash model, you can optionally configure your own API key in Settings.
+I'm your intelligent digital companion, ready to assist with your projects and ideas. For enhanced capabilities, you can configure your API key in Settings.
 
-**I can still help you with:**
+**I can help you with:**
 • Code architecture and system design
 • Technical problem-solving and debugging  
 • Creative brainstorming and innovation

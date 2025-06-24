@@ -1,9 +1,10 @@
 "use client"
 
-import { Bot, User, Sparkles, Download, Copy, Check } from "lucide-react"
-import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+
+import { User, Sparkles, Download, Copy, Check } from "lucide-react"
 import { useState } from "react"
+import Image from "next/image"
 
 interface Message {
   id: string
@@ -42,31 +43,39 @@ export function ChatMessage({ message }: ChatMessageProps) {
   }
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-6`}>
-      <div className={`flex items-start space-x-4 max-w-[85%] ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}>
+      <div className={`flex items-start space-x-3 max-w-[85%] ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
         {/* Avatar */}
         <div
-          className={`flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center relative shadow-lg ${
+          className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center relative shadow-md ${
             isUser
               ? "bg-gradient-to-r from-blue-500 to-purple-500"
               : "bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500"
           }`}
         >
           {isUser ? (
-            <User className="w-6 h-6 text-white" />
+            <User className="w-5 h-5 text-white" />
           ) : (
             <>
-              <Bot className="w-6 h-6 text-white" />
+              <div className="w-6 h-6 rounded-md overflow-hidden">
+                <Image
+                  src="/dr-ai-logo.jpg"
+                  alt="DR Ai"
+                  width={24}
+                  height={24}
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <Sparkles className="w-3 h-3 text-yellow-300 absolute -top-1 -right-1 animate-pulse" />
             </>
           )}
         </div>
 
         {/* Message Content */}
-        <Card className="p-6 card-bg shadow-xl relative group">
+        <div className="relative group max-w-full">
           {/* Image Content */}
           {message.image && (
-            <div className="mb-4 relative">
+            <div className="mb-3 relative">
               <img
                 src={message.image || "/placeholder.svg"}
                 alt="Uploaded content"
@@ -86,33 +95,39 @@ export function ChatMessage({ message }: ChatMessageProps) {
           )}
 
           {/* Text Content */}
-          <div className="text-base leading-relaxed whitespace-pre-wrap font-medium text-primary">
-            {message.content}
-          </div>
-
-          {/* Message Actions */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="text-xs text-muted font-medium">
-              {message.timestamp.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })}
+          <div
+            className={`p-4 rounded-2xl ${
+              isUser
+                ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary"
+                : "bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-blue-500/10 text-primary"
+            }`}
+          >
+            <div className="text-sm md:text-base leading-relaxed whitespace-pre-wrap font-medium">
+              {message.content}
             </div>
 
-            {!isUser && (
-              <Button
-                onClick={() => copyToClipboard(message.content)}
-                size="sm"
-                variant="ghost"
-                className="text-muted hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
-                aria-label="Copy message"
-              >
-                {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-              </Button>
-            )}
+            {/* Message Actions */}
+            <div className="flex items-center justify-between mt-3">
+              <div className="text-xs text-muted font-medium">
+                {message.timestamp.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+              </div>
+
+              {!isUser && (
+                <button
+                  onClick={() => copyToClipboard(message.content)}
+                  className="text-muted hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
+                  aria-label="Copy message"
+                >
+                  {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                </button>
+              )}
+            </div>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   )
