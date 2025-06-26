@@ -8,17 +8,18 @@ import {
   Settings,
   History,
   UserCircle,
-  Code,
+  Code, // Keep Code icon for code generation features
   Sparkles,
   Zap,
   Upload,
   Download,
   ImageIcon,
-  Wand2,
+  Wand2, // For 'Architect the impossible' tagline
   Loader2,
   AlertCircle,
-  X,
-  Plus,
+  Info, // For About/Policy
+  BookText, // For Privacy
+  MessageSquare, // For main chat/home icon
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -89,9 +90,9 @@ export default function HomePage() {
       id: "welcome-1",
       content: `**Welcome to DR Ai — Dream Architect Intelligence**
 
-🎨 _"Complete your dreams with code. Architect the impossible."_
+🎨 _“Complete your dreams with code. Architect the impossible.”_
 
-I'm your personal **Legendary Digital Architect**, designed to **transform your ideas into real working software** — whether it's a full website, mobile app, or whatever your dream.
+I'm your personal **Legendary Digital Architect**, designed to **transform your ideas into real working software** — whether it’s a full website, mobile app, or whatever your dream.
 
 ---
 
@@ -282,10 +283,10 @@ I'm your personal **Legendary Digital Architect**, designed to **transform your 
 
       {/* Header */}
       <header className="flex-shrink-0 z-50 backdrop-blur-md bg-white/10 border-b border-white/20">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
             <div className="relative gpu-accelerated">
-              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg ring-2 ring-purple-400/30">
+              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg">
                 <Image
                   src="/dr-ai-logo.jpg"
                   alt="DR Ai Logo"
@@ -310,18 +311,18 @@ I'm your personal **Legendary Digital Architect**, designed to **transform your 
               onClick={handleNewChat}
               variant="ghost"
               size="sm"
-              className="text-secondary hover:text-primary border border-white/20 hover:border-white/40 hidden sm:flex focus-ring glass-button transition-all duration-200"
+              className="text-secondary hover:text-primary border border-opacity-30 hidden sm:flex focus-ring glass-button"
               aria-label="Start new chat session"
             >
-              <Plus className="w-4 h-4 mr-2" />
-              New Chat
+              <Zap className="w-4 h-4 mr-2" />
+              New Session
             </Button>
 
             <Button
               onClick={downloadChat}
               variant="ghost"
               size="sm"
-              className="text-secondary hover:text-primary focus-ring glass-button transition-all duration-200"
+              className="text-secondary hover:text-primary focus-ring glass-button"
               disabled={messages.length <= 1}
               aria-label="Download chat history"
             >
@@ -331,19 +332,19 @@ I'm your personal **Legendary Digital Architect**, designed to **transform your 
             <ThemeSwitcher />
 
             <Link href="/history" aria-label="View chat history">
-              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring glass-button transition-all duration-200">
+              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring glass-button">
                 <History className="w-4 h-4" />
               </Button>
             </Link>
 
             <Link href="/profile" aria-label="View profile">
-              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring glass-button transition-all duration-200">
+              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring glass-button">
                 <UserCircle className="w-4 h-4" />
               </Button>
             </Link>
 
             <Link href="/settings" aria-label="Open settings">
-              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring glass-button transition-all duration-200">
+              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring glass-button">
                 <Settings className="w-4 h-4" />
               </Button>
             </Link>
@@ -353,10 +354,10 @@ I'm your personal **Legendary Digital Architect**, designed to **transform your 
 
       {/* Tagline Banner */}
       <div className="flex-shrink-0 card-bg border-b border-white/20">
-        <div className="container mx-auto px-4 py-3 text-center">
+        <div className="container mx-auto px-4 py-2 text-center">
           <p className="text-base md:text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
-            <Wand2 className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
-            Architect the impossible.
+              <Wand2 className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
+              Architect the impossible.
           </p>
         </div>
       </div>
@@ -369,7 +370,7 @@ I'm your personal **Legendary Digital Architect**, designed to **transform your 
               <AlertCircle className="w-5 h-5" />
               <span className="text-sm font-medium">
                 AI Integration Required: Configure your AI service in{" "}
-                <Link href="/settings" className="underline hover:text-yellow-300 transition-colors">
+                <Link href="/settings" className="underline hover:text-yellow-300">
                   API Integration
                 </Link>{" "}
                 to unlock the full potential of DR Ai.
@@ -381,20 +382,20 @@ I'm your personal **Legendary Digital Architect**, designed to **transform your 
 
       {/* Main Content Area (Chat Messages and Input) */}
       <div className="flex-1 overflow-hidden relative max-w-full">
-        <div className="container mx-auto px-4 py-6 max-w-6xl h-full flex flex-col relative z-10">
-          <Card className="flex-1 card-bg flex flex-col shadow-2xl rounded-2xl overflow-hidden border border-white/10">
+        <div className="container mx-auto px-4 py-6 max-w-5xl h-full flex flex-col relative z-10">
+          <Card className="flex-1 card-bg flex flex-col shadow-2xl rounded-xl overflow-hidden">
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
               {messages.map((message) => (
                 <div key={message.id} className="max-w-[100%] overflow-x-hidden">
-                  <ChatMessage message={message} />
+                    <ChatMessage message={message} />
                 </div>
               ))}
 
               {isLoading && (
-                <div className="flex items-center space-x-3 text-secondary px-4 py-2" role="status" aria-live="polite">
+                <div className="flex items-center space-x-3 text-secondary px-4" role="status" aria-live="polite">
                   <div className="relative">
-                    <Bot className="w-6 h-6 text-purple-400" />
+                    <Bot className="w-6 h-6" />
                     <div className="absolute inset-0 bg-purple-500/20 rounded-full animate-ping"></div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -418,103 +419,113 @@ I'm your personal **Legendary Digital Architect**, designed to **transform your 
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Enhanced Input Section */}
-            <div className="flex-shrink-0 border-t border-white/10 bg-gradient-to-r from-slate-900/50 to-purple-900/50 backdrop-blur-sm">
+            {/* Input Form */}
+            <div className="flex-shrink-0 p-4 border-t card-bg">
               {/* Image Preview */}
               {selectedImage && (
-                <div className="px-6 pt-4 pb-2">
-                  <div className="relative inline-block">
-                    <div className="relative rounded-xl overflow-hidden shadow-lg border border-white/20">
-                      <img
-                        src={selectedImage || "/placeholder.svg"}
-                        alt="Selected for analysis"
-                        className="max-w-32 max-h-32 object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    </div>
-                    <Button
-                      onClick={() => setSelectedImage(null)}
-                      size="icon"
-                      variant="destructive"
-                      className="absolute -top-2 -right-2 w-7 h-7 p-0 rounded-full shadow-lg border border-white/20 transition-all duration-200 hover:scale-110"
-                      aria-label="Remove selected image"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      onClick={downloadImage}
-                      size="icon"
-                      variant="ghost"
-                      className="absolute -bottom-2 -left-2 w-7 h-7 p-0 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 transition-all duration-200 hover:scale-110"
-                      aria-label="Download image"
-                    >
-                      <Download className="w-3 h-3" />
-                    </Button>
-                  </div>
+                <div className="mb-3 relative inline-block">
+                  <img
+                    src={selectedImage || "/placeholder.svg"}
+                    alt="Selected for analysis"
+                    className="max-w-28 max-h-28 rounded-lg shadow-lg object-cover"
+                  />
+                  <Button
+                    onClick={() => setSelectedImage(null)}
+                    size="icon"
+                    variant="destructive"
+                    className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full flex items-center justify-center text-white bg-red-500 hover:bg-red-600"
+                    aria-label="Remove selected image"
+                  >
+                    ×
+                  </Button>
+                  <Button
+                    onClick={downloadImage}
+                    size="icon"
+                    variant="ghost"
+                    className="absolute -bottom-2 -left-2 w-6 h-6 p-0 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center"
+                    aria-label="Download image"
+                  >
+                    <Download className="w-3 h-3" />
+                  </Button>
                 </div>
               )}
 
-              {/* Input Form */}
-              <div className="p-6">
-                <form onSubmit={handleSubmit} className="flex items-end gap-3">
-                  {/* File Upload Button */}
-                  <div className="flex-shrink-0">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-11 h-11 text-secondary hover:text-primary focus-ring glass-button transition-all duration-200 hover:scale-105 border border-white/20 hover:border-white/40"
-                      aria-label="Upload image"
-                      disabled={isLoading}
-                    >
-                      <ImageIcon className="w-5 h-5" />
-                    </Button>
-                  </div>
+              <form onSubmit={handleSubmit} className="flex gap-2 sm:gap-3 items-center">
+                {/* File Upload Button */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-secondary hover:text-primary focus-ring glass-button flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10"
+                  aria-label="Upload image"
+                  disabled={isLoading}
+                >
+                  <ImageIcon className="w-5 h-5" />
+                </Button>
 
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    aria-label="Select image file"
-                  />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  aria-label="Select image file"
+                />
 
-                  {/* Text Input Container */}
-                  <div className="flex-1 relative">
-                    <Input
-                      ref={inputRef}
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      placeholder={
-                        hasAnyApiKey
-                          ? "Architect your vision... Type your message here"
-                          : "Configure AI integration to start architecting..."
-                      }
-                      className="w-full input-bg text-primary text-base py-3 px-4 pr-12 focus-ring glass-input border border-white/20 hover:border-white/30 focus:border-purple-400/50 rounded-xl transition-all duration-200 min-h-[44px] resize-none"
-                      disabled={isLoading || !hasAnyApiKey}
-                      aria-label="Chat input"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSubmit(e);
-                        }
-                      }}
-                    />
-                    
-                    {/* Character count or status indicator */}
-                    {input.length > 0 && (
-                      <div className="absolute right-3 bottom-1 text-xs text-secondary/60">
-                        {input.length}
-                      </div>
-                    )}
-                  </div>
+                {/* Text Input */}
+                <Input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={
+                    hasAnyApiKey
+                      ? "Architect your vision..."
+                      : "Configure AI integration to start architecting..."
+                  }
+                  className="flex-1 input-bg text-primary text-base py-2.5 px-4 focus-ring glass-input resize-none overflow-hidden h-10 sm:h-12"
+                  disabled={isLoading}
+                  aria-label="Chat input"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
+                  }}
+                />
 
-                  {/* Send Button */}
-                  <div className="flex-shrink-0">
-                    <Button
-                      type="submit"
-                      size="icon"
-                      className={`w-11 h-11 transition-all duration-200 focus-ring ${
-                        (!input.trim() && !selectedI
+                {/* Send Button */}
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  size="icon"
+                  className="text-primary hover:text-purple-400 focus-ring glass-button flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10"
+                  disabled={isLoading || (!input.trim() && !selectedImage)}
+                  aria-label="Send message"
+                >
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                </Button>
+              </form>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* Bottom Navigation Bar */}
+      {/* Fixed at the bottom, responsive layout */}
+      <footer className="flex-shrink-0 z-50 backdrop-blur-md bg-white/10 border-t border-white/20 p-2 sm:p-3">
+        <div className="container mx-auto flex justify-around items-center max-w-xl">
+          <Link href="/" aria-label="Home / Chat">
+            <Button variant="ghost" size="icon" className="text-secondary hover:text-primary focus-ring glass-button flex-col gap-0.5 text-xs sm:text-sm">
+              <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="hidden sm:inline-block">Chat</span>
+            </Button>
+          </Link>
+          <Link href="/privacy" aria-label="Privacy Policy">
+            <Button variant="ghost" size="icon" className="text-secondary hover:text-primary focus-ring glass-button flex-col gap-0.5 text-xs sm:text-sm">
+              <BookText className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="hidden sm:inline-block">Privacy</span>
+            </Button>
+          </Link>
+          <Link href="/about" aria-label="About Us">
+       
