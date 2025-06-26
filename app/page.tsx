@@ -62,7 +62,6 @@ export default function HomePage() {
   }, [messages, scrollToBottom])
 
   useEffect(() => {
-    // Check for server API key
     const checkKeys = async () => {
       const serverKey = await checkServerApiKey()
       const userKey = !!localStorage.getItem("gemini-api-key")
@@ -72,7 +71,6 @@ export default function HomePage() {
 
     checkKeys()
 
-    // Listen for storage changes
     const handleStorageChange = () => {
       const userKey = !!localStorage.getItem("gemini-api-key")
       setHasUserApiKey(userKey)
@@ -86,31 +84,30 @@ export default function HomePage() {
 
   const welcomeMessage = useMemo(
     () => ({
-      id: "welcome-1",
-      content: `🚀 **Welcome to DR Ai - Dream Architect Intelligence**
+      id: "welcome",
+      content: `🚀 **Welcome to DR Ai — Dream Architect Intelligence**
 
-✨ **Code your dreams. Architect your future.**
+🎨 _“Complete your dreams with code. Architect the impossible.”_
 
-I'm your legendary digital companion, designed to transform your ideas into reality. Whether you're architecting complex systems, crafting innovative solutions, or exploring the frontiers of technology, I'm here to amplify your creative potential. My core mission is to empower you to **build, innovate, and lead** in the digital realm.
+I'm your personal **Legendary Digital Architect**, designed to **transform your ideas into real working software** — whether it’s a full website, mobile app, or AI-powered system.
 
-🎯 **What I can help you with:**
-• **Advanced code generation** and optimization (Full Stack, Frontend, Backend) 💻
-• **System architecture** and design patterns (Websites, Web Apps, APIs, APKs) ⚙️
-• **Creative problem-solving** and innovation 💡
-• **Technical documentation** and analysis 📄
-• **Image analysis** and visual understanding 👁️
-• **File processing** and content generation ✍️
-• **Future-tech exploration** and planning 🔮
+---
 
-🔥 **Features:**
-• **Upload images** for AI analysis 🖼️
-• **Generate content** with advanced AI (ready for copy-paste) ✅
-• **Download conversations** and files ⬇️
-• **Multi-modal interactions** with text and images 🗣️
-• **Well-structured, clean, and production-ready code output** 💯
+🧠 **Functionalities:**
+• 🧩 **Generate any code** — from frontend to backend (HTML, React, Next.js, PHP, Node, Flutter, Kotlin, etc.)  
+• 🗺️ **Create complete maps of websites or apps** — layout, routes, API structure  
+• 📱 **Auto-generate full APK apps** — with working UI, logic, and exportable code  
+• 🧠 **AI-powered tutor** — explain, debug, and teach any concept step-by-step  
+• 🖼️ **Image-to-code & analysis** — upload an image and let DR Ai process or code it  
+• 🔄 **File conversion & understanding** — convert `.pdf`, `.xml`, `.zip`, `.txt`, and analyze the contents  
+• 📂 **Download your chats, code, images** — full export system built-in  
+• 💥**Upload images** for AI analysis
+• 🩸**Generate content** with advanced AI
+• 😍**Download conversations** and files
+•♥️ **Multi-modal interactions** with text and images
 
 Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!" : "Configure your API key in Settings to unlock full capabilities."}`,
-      role: "assistant" as const,
+      role: "Dream Architect assistant" as const,
       timestamp: new Date(),
     }),
     [hasAnyApiKey],
@@ -193,7 +190,6 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
       try {
         let response: string
 
-        // Use server action if server API key is available, otherwise use user's key
         if (hasServerApiKey) {
           response = await generateAIResponse(
             input.trim() || (selectedImage ? "Please analyze this image" : ""),
@@ -201,9 +197,9 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
           )
         } else if (hasUserApiKey) {
           response = await generateResponseWithUserKey(
-              input.trim() || (selectedImage ? "Please analyze this image" : ""),
-              selectedImage || undefined,
-            )
+            input.trim() || (selectedImage ? "Please analyze this image" : ""),
+            selectedImage || undefined,
+          )
         } else {
           throw new Error("No API key configured. Please set up your API key in Settings.")
         }
@@ -259,7 +255,7 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
 
     const a = document.createElement("a")
     a.href = selectedImage
-    a.download = `dr-ai-image-${Date.now()}.png` // Changed to PNG for better quality/transparency
+    a.download = `dr-ai-image-${Date.now()}.png`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -362,8 +358,8 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
       <div className="flex-shrink-0 card-bg border-b border-white/20">
         <div className="container mx-auto px-4 py-2 text-center">
           <p className="text-base md:text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
-              <Code className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
-              Code your dreams. Architect your future.
+            <Code className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
+            Code your dreams. Architect your future.
           </p>
         </div>
       </div>
@@ -387,13 +383,18 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
       )}
 
       {/* Main Content Area (Chat Messages and Input) */}
-      <div className="flex-1 overflow-hidden relative">
+      {/* Added max-w-full to ensure it doesn't overflow on small screens if content is too wide */}
+      <div className="flex-1 overflow-hidden relative max-w-full"> 
         <div className="container mx-auto px-4 py-6 max-w-5xl h-full flex flex-col relative z-10">
           <Card className="flex-1 card-bg flex flex-col shadow-2xl rounded-xl overflow-hidden">
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
               {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
+                // Added max-w-[100%] and overflow-x-hidden to ChatMessage wrapper
+                // This ensures individual messages don't cause horizontal scroll
+                <div key={message.id} className="max-w-[100%] overflow-x-hidden">
+                    <ChatMessage message={message} />
+                </div>
               ))}
 
               {isLoading && (
@@ -435,7 +436,7 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
                   />
                   <Button
                     onClick={() => setSelectedImage(null)}
-                    size="icon" // Changed to icon size for better control
+                    size="icon"
                     variant="destructive"
                     className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full flex items-center justify-center text-white bg-red-500 hover:bg-red-600"
                     aria-label="Remove selected image"
@@ -444,7 +445,7 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
                   </Button>
                   <Button
                     onClick={downloadImage}
-                    size="icon" // Changed to icon size
+                    size="icon"
                     variant="ghost"
                     className="absolute -bottom-2 -left-2 w-6 h-6 p-0 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center"
                     aria-label="Download image"
@@ -459,7 +460,7 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon" // Changed to icon size
+                  size="icon"
                   onClick={() => fileInputRef.current?.click()}
                   className="text-secondary hover:text-primary focus-ring glass-button flex-shrink-0"
                   aria-label="Upload image"
@@ -487,7 +488,7 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
                       ? "Describe your vision, upload an image, or ask me anything..."
                       : "Configure AI integration to start architecting..."
                   }
-                  className="flex-1 input-bg text-primary text-base py-2 px-4 focus-ring glass-input resize-none overflow-hidden" // Removed md:py-6, added resize-none overflow-hidden
+                  className="flex-1 input-bg text-primary text-base py-2 px-4 focus-ring glass-input resize-none overflow-hidden"
                   disabled={isLoading}
                   aria-label="Chat input"
                   onKeyDown={(e) => {
@@ -502,7 +503,7 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
                 <Button
                   type="submit"
                   variant="ghost"
-                  size="icon" // Changed to icon size
+                  size="icon"
                   className="text-primary hover:text-purple-400 focus-ring glass-button flex-shrink-0"
                   disabled={isLoading || (!input.trim() && !selectedImage)}
                   aria-label="Send message"
@@ -516,4 +517,4 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
       </div>
     </div>
   )
-}
+  }
