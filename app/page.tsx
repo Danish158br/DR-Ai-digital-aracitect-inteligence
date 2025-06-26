@@ -517,35 +517,4 @@ I'm your personal **Legendary Digital Architect**, designed to **transform your 
                       type="submit"
                       size="icon"
                       className={`w-11 h-11 transition-all duration-200 focus-ring ${
-                        (!input.trim() && !selectedImage) || isLoading || !hasAnyApiKey
-                          ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                          : "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
-                      } rounded-xl border border-white/20`}
-                      disabled={isLoading || (!input.trim() && !selectedImage) || !hasAnyApiKey}
-                      aria-label="Send message"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <Send className="w-5 h-5" />
-                      )}
-                    </Button>
-                  </div>
-                </form>
-
-                {/* Quick Actions or Tips */}
-                {!hasAnyApiKey && (
-                  <div className="mt-3 text-center">
-                    <p className="text-xs text-secondary/70">
-                      Connect your AI service to start creating amazing projects
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </div>
-  )
-}
+                        (!input.trim() && !selectedI
