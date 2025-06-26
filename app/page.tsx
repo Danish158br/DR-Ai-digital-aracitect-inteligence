@@ -91,22 +91,23 @@ export default function HomePage() {
 
 ✨ **Code your dreams. Architect your future.**
 
-I'm your legendary digital companion, designed to transform your ideas into reality. Whether you're architecting complex systems, crafting innovative solutions, or exploring the frontiers of technology, I'm here to amplify your creative potential.
+I'm your legendary digital companion, designed to transform your ideas into reality. Whether you're architecting complex systems, crafting innovative solutions, or exploring the frontiers of technology, I'm here to amplify your creative potential. My core mission is to empower you to **build, innovate, and lead** in the digital realm.
 
 🎯 **What I can help you with:**
-• **Advanced code generation** and optimization
-• **System architecture** and design patterns
-• **Creative problem-solving** and innovation
-• **Technical documentation** and analysis
-• **Image analysis** and visual understanding
-• **File processing** and content generation
-• **Future-tech exploration** and planning
+• **Advanced code generation** and optimization (Full Stack, Frontend, Backend) 💻
+• **System architecture** and design patterns (Websites, Web Apps, APIs, APKs) ⚙️
+• **Creative problem-solving** and innovation 💡
+• **Technical documentation** and analysis 📄
+• **Image analysis** and visual understanding 👁️
+• **File processing** and content generation ✍️
+• **Future-tech exploration** and planning 🔮
 
 🔥 **Features:**
-• **Upload images** for AI analysis
-• **Generate content** with advanced AI
-• **Download conversations** and files
-• **Multi-modal interactions** with text and images
+• **Upload images** for AI analysis 🖼️
+• **Generate content** with advanced AI (ready for copy-paste) ✅
+• **Download conversations** and files ⬇️
+• **Multi-modal interactions** with text and images 🗣️
+• **Well-structured, clean, and production-ready code output** 💯
 
 Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!" : "Configure your API key in Settings to unlock full capabilities."}`,
       role: "assistant" as const,
@@ -200,9 +201,9 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
           )
         } else if (hasUserApiKey) {
           response = await generateResponseWithUserKey(
-            input.trim() || (selectedImage ? "Please analyze this image" : ""),
-            selectedImage || undefined,
-          )
+              input.trim() || (selectedImage ? "Please analyze this image" : ""),
+              selectedImage || undefined,
+            )
         } else {
           throw new Error("No API key configured. Please set up your API key in Settings.")
         }
@@ -361,8 +362,8 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
       <div className="flex-shrink-0 card-bg border-b border-white/20">
         <div className="container mx-auto px-4 py-2 text-center">
           <p className="text-base md:text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
-            <Code className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
-            Code your dreams. Architect your future.
+              <Code className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
+              Code your dreams. Architect your future.
           </p>
         </div>
       </div>
@@ -515,4 +516,4 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
       </div>
     </div>
   )
-  }
+}
