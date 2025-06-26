@@ -85,28 +85,23 @@ export default function HomePage() {
   const welcomeMessage = useMemo(
     () => ({
       id: "welcome-1",
-      content: `🚀 **Welcome to DR Ai - Dream Architect Intelligence**
+      content: `**Welcome to DR Ai — Dream Architect Intelligence**
 
-✨ **Code your dreams. Architect your future.**
+🎨 _“Complete your dreams with code. Architect the impossible.”_
 
-I'm your legendary digital companion, designed to transform your ideas into reality. Whether you're architecting complex systems, crafting innovative solutions, or exploring the frontiers of technology, I'm here to amplify your creative potential.
+I'm your personal **Legendary Digital Architect**, designed to **transform your ideas into real working software** — whether it’s a full website, mobile app, or whatever your dream.
 
-🎯 **What I can help you with:**
-• **Advanced code generation** and optimization
-• **System architecture** and design patterns
-• **Creative problem-solving** and innovation
-• **Technical documentation** and analysis
-• **Image analysis** and visual understanding
-• **File processing** and content generation
-• **Future-tech exploration** and planning
+---
 
-🔥 **Features:**
-• **Upload images** for AI analysis
-• **Generate content** with advanced AI
-• **Download conversations** and files
-• **Multi-modal interactions** with text and images
-
-Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!" : "Configure your API key in Settings to unlock full capabilities."}`,
+🧠 **Core Functionalities:**
+• 🧩 **Generate any code** — from frontend to backend (HTML, React, Next.js, PHP, Node, Flutter, Kotlin, etc.)
+• 🗺️ **Create complete maps of websites or apps** — layout, routes, API structure
+• 📱 **Auto-generate full APK apps** — with working UI, logic, and exportable code
+• 🧠 **AI-powered tutor** — explain, debug, and teach any concept step-by-step
+• 🖼️ **Image-to-code & analysis** — upload an image and let DR Ai process or code it
+• 🔄 **File conversion & understanding** — convert .pdf, .xml, .zip, .txt, and analyze the contents
+• 📂 **Download your chats, code, images** — full export system built-in
+• ♥️ **Multi-modal interactions** — seamlessly combine text, images, and other file types for advanced AI processing.`,
       role: "assistant" as const,
       timestamp: new Date(),
     }),
@@ -358,8 +353,8 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
       <div className="flex-shrink-0 card-bg border-b border-white/20">
         <div className="container mx-auto px-4 py-2 text-center">
           <p className="text-base md:text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
-            <Code className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
-            Code your dreams. Architect your future.
+              <Wand2 className="w-4 h-4 md:w-5 md:h-5 inline mr-2" /> {/* Changed Code to Wand2 */}
+              Architect the impossible.
           </p>
         </div>
       </div>
@@ -383,15 +378,12 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
       )}
 
       {/* Main Content Area (Chat Messages and Input) */}
-      {/* Added max-w-full to ensure it doesn't overflow on small screens if content is too wide */}
-      <div className="flex-1 overflow-hidden relative max-w-full"> 
+      <div className="flex-1 overflow-hidden relative max-w-full">
         <div className="container mx-auto px-4 py-6 max-w-5xl h-full flex flex-col relative z-10">
           <Card className="flex-1 card-bg flex flex-col shadow-2xl rounded-xl overflow-hidden">
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
               {messages.map((message) => (
-                // Added max-w-[100%] and overflow-x-hidden to ChatMessage wrapper
-                // This ensures individual messages don't cause horizontal scroll
                 <div key={message.id} className="max-w-[100%] overflow-x-hidden">
                     <ChatMessage message={message} />
                 </div>
@@ -425,14 +417,15 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
             </div>
 
             {/* Input Form */}
-            <div className="flex-shrink-0 p-6 border-t card-bg">
+            {/* Adjusted padding and flex alignment for professional look */}
+            <div className="flex-shrink-0 p-4 border-t card-bg"> {/* Reduced p-6 to p-4 for more compact look */}
               {/* Image Preview */}
               {selectedImage && (
-                <div className="mb-4 relative inline-block">
+                <div className="mb-3 relative inline-block"> {/* Reduced mb-4 to mb-3 */}
                   <img
                     src={selectedImage || "/placeholder.svg"}
                     alt="Selected for analysis"
-                    className="max-w-32 max-h-32 rounded-lg shadow-lg object-cover"
+                    className="max-w-28 max-h-28 rounded-lg shadow-lg object-cover" // Slightly smaller image preview
                   />
                   <Button
                     onClick={() => setSelectedImage(null)}
@@ -455,14 +448,14 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+              <form onSubmit={handleSubmit} className="flex gap-2 sm:gap-3 items-center"> {/* Aligned items-center for better vertical alignment, adjusted gap */}
                 {/* File Upload Button */}
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-secondary hover:text-primary focus-ring glass-button flex-shrink-0"
+                  className="text-secondary hover:text-primary focus-ring glass-button flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10" // Adjusted size for better feel
                   aria-label="Upload image"
                   disabled={isLoading}
                 >
@@ -485,10 +478,10 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={
                     hasAnyApiKey
-                      ? "Describe your vision, upload an image, or ask me anything..."
+                      ? "Architect your vision..."
                       : "Configure AI integration to start architecting..."
                   }
-                  className="flex-1 input-bg text-primary text-base py-2 px-4 focus-ring glass-input resize-none overflow-hidden"
+                  className="flex-1 input-bg text-primary text-base py-2.5 px-4 focus-ring glass-input resize-none overflow-hidden h-10 sm:h-12" // Refined height and padding for input
                   disabled={isLoading}
                   aria-label="Chat input"
                   onKeyDown={(e) => {
@@ -504,7 +497,7 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
                   type="submit"
                   variant="ghost"
                   size="icon"
-                  className="text-primary hover:text-purple-400 focus-ring glass-button flex-shrink-0"
+                  className="text-primary hover:text-purple-400 focus-ring glass-button flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10" // Adjusted size for better feel
                   disabled={isLoading || (!input.trim() && !selectedImage)}
                   aria-label="Send message"
                 >
