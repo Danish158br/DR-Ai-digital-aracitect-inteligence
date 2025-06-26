@@ -84,30 +84,30 @@ export default function HomePage() {
 
   const welcomeMessage = useMemo(
     () => ({
-      id: "welcome",
-      content: `🚀 **Welcome to DR Ai — Dream Architect Intelligence**
+      id: "welcome-1",
+      content: `🚀 **Welcome to DR Ai - Dream Architect Intelligence**
 
-🎨 _“Complete your dreams with code. Architect the impossible.”_
+✨ **Code your dreams. Architect your future.**
 
-I'm your personal **Legendary Digital Architect**, designed to **transform your ideas into real working software** — whether it’s a full website, mobile app, or AI-powered system.
+I'm your legendary digital companion, designed to transform your ideas into reality. Whether you're architecting complex systems, crafting innovative solutions, or exploring the frontiers of technology, I'm here to amplify your creative potential.
 
----
+🎯 **What I can help you with:**
+• **Advanced code generation** and optimization
+• **System architecture** and design patterns
+• **Creative problem-solving** and innovation
+• **Technical documentation** and analysis
+• **Image analysis** and visual understanding
+• **File processing** and content generation
+• **Future-tech exploration** and planning
 
-🧠 **Functionalities:**
-• 🧩 **Generate any code** — from frontend to backend (HTML, React, Next.js, PHP, Node, Flutter, Kotlin, etc.)  
-• 🗺️ **Create complete maps of websites or apps** — layout, routes, API structure  
-• 📱 **Auto-generate full APK apps** — with working UI, logic, and exportable code  
-• 🧠 **AI-powered tutor** — explain, debug, and teach any concept step-by-step  
-• 🖼️ **Image-to-code & analysis** — upload an image and let DR Ai process or code it  
-• 🔄 **File conversion & understanding** — convert `.pdf`, `.xml`, `.zip`, `.txt`, and analyze the contents  
-• 📂 **Download your chats, code, images** — full export system built-in  
-• 💥**Upload images** for AI analysis
-• 🩸**Generate content** with advanced AI
-• 😍**Download conversations** and files
-•♥️ **Multi-modal interactions** with text and images
+🔥 **Features:**
+• **Upload images** for AI analysis
+• **Generate content** with advanced AI
+• **Download conversations** and files
+• **Multi-modal interactions** with text and images
 
 Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!" : "Configure your API key in Settings to unlock full capabilities."}`,
-      role: "Dream Architect assistant" as const,
+      role: "assistant" as const,
       timestamp: new Date(),
     }),
     [hasAnyApiKey],
@@ -517,4 +517,4 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
       </div>
     </div>
   )
-  }
+}
