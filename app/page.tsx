@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { ChatMessage } from "@/components/chat-message"
@@ -51,19 +52,17 @@ export default function HomePage() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" })
+    }
   }, [])
 
   useEffect(() => {
     scrollToBottom()
   }, [messages, scrollToBottom])
-    
-  // Auto-focus the input on component mount
-  useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
 
   useEffect(() => {
+    // Check for server API key
     const checkKeys = async () => {
       const serverKey = await checkServerApiKey()
       const userKey = !!localStorage.getItem("gemini-api-key")
@@ -73,6 +72,7 @@ export default function HomePage() {
 
     checkKeys()
 
+    // Listen for storage changes
     const handleStorageChange = () => {
       const userKey = !!localStorage.getItem("gemini-api-key")
       setHasUserApiKey(userKey)
@@ -95,7 +95,7 @@ I'm your legendary digital companion, designed to transform your ideas into real
 
 🎯 **What I can help you with:**
 • **Advanced code generation** and optimization
-• **System architecture** and design patterns   
+• **System architecture** and design patterns
 • **Creative problem-solving** and innovation
 • **Technical documentation** and analysis
 • **Image analysis** and visual understanding
@@ -177,7 +177,7 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
       setError(null)
       const userMessage: Message = {
         id: Date.now().toString(),
-        content: input.trim() || "Please analyze this image",
+        content: input.trim() || (selectedImage ? "Please analyze this image" : ""),
         role: "user",
         timestamp: new Date(),
         image: selectedImage || undefined,
@@ -192,11 +192,15 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
       try {
         let response: string
 
+        // Use server action if server API key is available, otherwise use user's key
         if (hasServerApiKey) {
-          response = await generateAIResponse(input.trim() || "Please analyze this image", selectedImage || undefined)
+          response = await generateAIResponse(
+            input.trim() || (selectedImage ? "Please analyze this image" : ""),
+            selectedImage || undefined,
+          )
         } else if (hasUserApiKey) {
           response = await generateResponseWithUserKey(
-            input.trim() || "Please analyze this image",
+            input.trim() || (selectedImage ? "Please analyze this image" : ""),
             selectedImage || undefined,
           )
         } else {
@@ -225,7 +229,7 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
     },
     [input, selectedImage, isLoading, hasServerApiKey, hasUserApiKey],
   )
-    
+
   const handleNewChat = useCallback(() => {
     setMessages([welcomeMessage])
     setInput("")
@@ -235,7 +239,9 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
 
   const downloadChat = useCallback(() => {
     if (messages.length === 0) return
+
     const chatContent = messages.map((msg) => `${msg.role === "user" ? "You" : "DR Ai"}: ${msg.content}`).join("\n\n")
+
     const blob = new Blob([chatContent], { type: "text/plain;charset=utf-8" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
@@ -247,156 +253,266 @@ Ready to architect the future together? ${hasAnyApiKey ? "Let's start building!"
     URL.revokeObjectURL(url)
   }, [messages])
 
+  const downloadImage = useCallback(() => {
+    if (!selectedImage) return
+
+    const a = document.createElement("a")
+    a.href = selectedImage
+    a.download = `dr-ai-image-${Date.now()}.png` // Changed to PNG for better quality/transparency
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }, [selectedImage])
+
   return (
     <div
-      className="flex flex-col h-screen w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden"
+      className="flex flex-col h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden"
       onDragEnter={handleDrag}
       onDragLeave={handleDrag}
       onDragOver={handleDrag}
       onDrop={handleDrop}
     >
-      {/* Background Grid */}
+      {/* Background Elements */}
       <div className="absolute inset-0 bg-grid pointer-events-none"></div>
 
-      {/* Drag and Drop Overlay */}
+      {/* Drag Overlay */}
       {dragActive && (
         <div className="fixed inset-0 z-50 bg-purple-500/20 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white/10 p-8 rounded-2xl border-2 border-dashed border-purple-400">
+          <div className="card-bg p-8 rounded-2xl border-2 border-dashed border-purple-400">
             <Upload className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-            <p className="text-xl font-semibold text-white text-center">Drop your image here</p>
-            <p className="text-gray-300 text-center mt-2">I'll analyze it for you</p>
+            <p className="text-xl font-semibold text-primary text-center">Drop your image here</p>
+            <p className="text-muted text-center mt-2">I'll analyze it for you</p>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <header className="flex-shrink-0 z-20 backdrop-blur-md bg-white/10 border-b border-white/20">
+      <header className="flex-shrink-0 z-50 backdrop-blur-md bg-white/10 border-b border-white/20">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg">
-                  <Image src="/dr-ai-logo.jpg" alt="DR Ai Logo" width={48} height={48} className="w-full h-full object-cover" priority />
-                </div>
-                <Sparkles className="w-3 h-3 text-yellow-400 absolute -top-1 -right-1 animate-pulse" />
+          <div className="flex items-center space-x-3">
+            <div className="relative gpu-accelerated">
+              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg">
+                <Image
+                  src="/dr-ai-logo.jpg"
+                  alt="DR Ai Logo"
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-cover"
+                  priority
+                />
               </div>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                  DR Ai
-                </h1>
-                <p className="text-xs text-gray-300 font-medium">Dream Architect Intelligence</p>
-              </div>
+              <Sparkles className="w-3 h-3 text-yellow-400 absolute -top-1 -right-1 animate-pulse" />
             </div>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                DR Ai
+              </h1>
+              <p className="text-xs text-secondary font-medium">Dream Architect Intelligence</p>
+            </div>
+          </div>
 
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <Button onClick={handleNewChat} variant="ghost" size="sm" className="text-gray-300 hover:text-white border border-transparent hover:border-white/30 hidden sm:flex focus-ring" aria-label="Start new chat session">
-                <Zap className="w-4 h-4 mr-2" />
-                New Session
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={handleNewChat}
+              variant="ghost"
+              size="sm"
+              className="text-secondary hover:text-primary border border-opacity-30 hidden sm:flex focus-ring glass-button"
+              aria-label="Start new chat session"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              New Session
+            </Button>
+
+            <Button
+              onClick={downloadChat}
+              variant="ghost"
+              size="sm"
+              className="text-secondary hover:text-primary focus-ring glass-button"
+              disabled={messages.length <= 1}
+              aria-label="Download chat history"
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+
+            <ThemeSwitcher />
+
+            <Link href="/history" aria-label="View chat history">
+              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring glass-button">
+                <History className="w-4 h-4" />
               </Button>
-              <Button onClick={downloadChat} variant="ghost" size="icon" className="text-gray-300 hover:text-white focus-ring" disabled={messages.length <= 1} aria-label="Download chat history">
-                <Download className="w-4 h-4" />
+            </Link>
+
+            <Link href="/profile" aria-label="View profile">
+              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring glass-button">
+                <UserCircle className="w-4 h-4" />
               </Button>
-              <ThemeSwitcher />
-              <Link href="/history" aria-label="View chat history">
-                <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white focus-ring">
-                  <History className="w-4 h-4" />
-                </Button>
-              </Link>
-              <Link href="/settings" aria-label="Open settings">
-                <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white focus-ring">
-                  <Settings className="w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
+            </Link>
+
+            <Link href="/settings" aria-label="Open settings">
+              <Button variant="ghost" size="sm" className="text-secondary hover:text-primary focus-ring glass-button">
+                <Settings className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
-      
-      {/* API Key Notice */}
+
+      {/* Tagline Banner */}
+      <div className="flex-shrink-0 card-bg border-b border-white/20">
+        <div className="container mx-auto px-4 py-2 text-center">
+          <p className="text-base md:text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
+            <Code className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
+            Code your dreams. Architect your future.
+          </p>
+        </div>
+      </div>
+
+      {/* API Integration Notice */}
       {!hasAnyApiKey && (
-        <div className="flex-shrink-0 bg-yellow-500/10 border-b border-yellow-500/20">
-          <div className="container mx-auto px-4 py-2">
-            <div className="flex items-center justify-center space-x-2 text-yellow-300">
+        <div className="flex-shrink-0 card-bg border-b border-white/20">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-center space-x-2 text-yellow-400">
               <AlertCircle className="w-5 h-5" />
-              <span className="text-sm font-medium text-center">
-                Configure your API key in{" "}
-                <Link href="/settings" className="underline hover:text-yellow-200">
-                  Settings
+              <span className="text-sm font-medium">
+                AI Integration Required: Configure your AI service in{" "}
+                <Link href="/settings" className="underline hover:text-yellow-300">
+                  API Integration
                 </Link>{" "}
-                to unlock full capabilities.
+                to unlock the full potential of DR Ai.
               </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Main Chat Area (Scrollable) */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-        <div className="max-w-5xl mx-auto w-full">
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
-            ))}
+      {/* Main Content Area (Chat Messages and Input) */}
+      <div className="flex-1 overflow-hidden relative">
+        <div className="container mx-auto px-4 py-6 max-w-5xl h-full flex flex-col relative z-10">
+          <Card className="flex-1 card-bg flex flex-col shadow-2xl rounded-xl overflow-hidden">
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+              {messages.map((message) => (
+                <ChatMessage key={message.id} message={message} />
+              ))}
 
-            {isLoading && (
-              <div className="flex items-start space-x-4 text-gray-300 px-4 mt-4" role="status" aria-live="polite">
-                <div className="relative w-8 h-8 flex-shrink-0">
-                  <Bot className="w-8 h-8" />
-                   <div className="absolute inset-0 bg-purple-500/20 rounded-full animate-ping"></div>
-                </div>
-                <div className="flex items-center space-x-2 pt-1">
-                  <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
-                  <span className="text-sm font-medium">Architecting your response...</span>
-                </div>
-              </div>
-            )}
-
-            {error && (
-              <div className="flex justify-center px-4 mt-4">
-                <div className="bg-red-500/10 backdrop-blur-md rounded-xl px-4 py-3 border border-red-500/20 max-w-md w-full">
-                  <div className="flex items-center space-x-2 text-red-400 text-sm">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    <span className="break-words">{error}</span>
+              {isLoading && (
+                <div className="flex items-center space-x-3 text-secondary px-4" role="status" aria-live="polite">
+                  <div className="relative">
+                    <Bot className="w-6 h-6" />
+                    <div className="absolute inset-0 bg-purple-500/20 rounded-full animate-ping"></div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                    <span className="text-sm font-medium">Architecting your response...</span>
                   </div>
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-        </div>
-      </main>
+              )}
 
-      {/* Input Form Area */}
-      <footer className="flex-shrink-0 p-4 w-full max-w-5xl mx-auto z-10">
-        <div className="relative bg-black/20 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg">
-            {selectedImage && (
-              <div className="p-3 border-b border-white/10">
-                <div className="relative inline-block">
-                  <img src={selectedImage} alt="Selected for analysis" className="max-w-24 max-h-24 rounded-lg shadow-md" />
-                  <Button onClick={() => setSelectedImage(null)} size="icon" variant="destructive" className="absolute -top-2 -right-2 w-6 h-6 rounded-full" aria-label="Remove selected image">
-                    <span className="text-lg">×</span>
+              {error && (
+                <div className="flex justify-center px-4">
+                  <div className="bg-red-500/10 backdrop-blur-md rounded-xl px-4 py-3 border border-red-500/20 max-w-md">
+                    <div className="flex items-center space-x-2 text-red-400 text-sm">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>{error}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Form */}
+            <div className="flex-shrink-0 p-6 border-t card-bg">
+              {/* Image Preview */}
+              {selectedImage && (
+                <div className="mb-4 relative inline-block">
+                  <img
+                    src={selectedImage || "/placeholder.svg"}
+                    alt="Selected for analysis"
+                    className="max-w-32 max-h-32 rounded-lg shadow-lg object-cover"
+                  />
+                  <Button
+                    onClick={() => setSelectedImage(null)}
+                    size="icon" // Changed to icon size for better control
+                    variant="destructive"
+                    className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full flex items-center justify-center text-white bg-red-500 hover:bg-red-600"
+                    aria-label="Remove selected image"
+                  >
+                    ×
+                  </Button>
+                  <Button
+                    onClick={downloadImage}
+                    size="icon" // Changed to icon size
+                    variant="ghost"
+                    className="absolute -bottom-2 -left-2 w-6 h-6 p-0 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center"
+                    aria-label="Download image"
+                  >
+                    <Download className="w-3 h-3" />
                   </Button>
                 </div>
-              </div>
-            )}
+              )}
 
-            <form onSubmit={handleSubmit} className="flex items-center gap-2 p-3">
-              <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} className="text-gray-300 hover:text-white focus-ring flex-shrink-0" aria-label="Upload image" disabled={isLoading}>
-                <ImageIcon className="w-5 h-5" />
-              </Button>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" aria-label="Select image file"/>
-              
-              <Input
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={ hasAnyApiKey ? "Describe your vision..." : "Configure API key in settings..." }
-                className="flex-1 bg-transparent border-none text-white text-base focus:ring-0 focus:outline-none placeholder:text-gray-400"
-                disabled={isLoading || !hasAnyApiKey}
-                aria-label="Chat input"
-              />
-              <Button type="submit" size="icon" className="bg-purple-600 hover:bg-purple-700 text-white rounded-full flex-shrink-0 focus-ring" disabled={(!input.trim() && !selectedImage) || isLoading}>
-                <Send className="w-5 h-5" />
-              </Button>
-            </form>
+              <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+                {/* File Upload Button */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon" // Changed to icon size
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-secondary hover:text-primary focus-ring glass-button flex-shrink-0"
+                  aria-label="Upload image"
+                  disabled={isLoading}
+                >
+                  <ImageIcon className="w-5 h-5" />
+                </Button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  aria-label="Select image file"
+                />
+
+                {/* Text Input */}
+                <Input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={
+                    hasAnyApiKey
+                      ? "Describe your vision, upload an image, or ask me anything..."
+                      : "Configure AI integration to start architecting..."
+                  }
+                  className="flex-1 input-bg text-primary text-base py-2 px-4 focus-ring glass-input resize-none overflow-hidden" // Removed md:py-6, added resize-none overflow-hidden
+                  disabled={isLoading}
+                  aria-label="Chat input"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
+                  }}
+                />
+
+                {/* Send Button */}
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  size="icon" // Changed to icon size
+                  className="text-primary hover:text-purple-400 focus-ring glass-button flex-shrink-0"
+                  disabled={isLoading || (!input.trim() && !selectedImage)}
+                  aria-label="Send message"
+                >
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                </Button>
+              </form>
+            </div>
+          </Card>
         </div>
-      </footer>
+      </div>
     </div>
   )
   }
